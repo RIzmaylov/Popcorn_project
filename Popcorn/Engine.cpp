@@ -1,27 +1,36 @@
-#include "Engine.h"
+п»ї#include "Engine.h"
 
-enum EBrick_Type
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+enum class ELetter_Type
+{
+	None,
+	O
+};
+
+enum class EBrick_Type
 {
 	None,
 	Red,
 	Blue
 };
 
-HPEN Hightlight_Pen, Brick_Red_pen, Brick_Blue_pen, Platform_Circle_pen, Platform_Inner_pen;
+HPEN Letter_Pen, Hightlight_Pen, Brick_Red_pen, Brick_Blue_pen, Platform_Circle_pen, Platform_Inner_pen;
 HBRUSH Brick_Red_brush, Brick_Blue_brush, Platform_Circle_brush, Platform_Inner_brush;
 
-const int Global_Scale = 4;											// глобальный масштаб всех элементов игры
-const int Brick_Width = 15;											// ширина элемента игры кирпич
-const int Brick_Height = 7;											// высота элемента игры кирпич
-const int Cell_Width = Brick_Width + 1;					// ширина ячейки (кирпич + 1 пиксельный отступ)
-const int Cell_Height = Brick_Height + 1;				// высота ячейки (кирпич + 1 пиксельный отступ)
-const int Level_X_Offset = 8;										// смещение игрового уровня по оси X от начала координат экрана
-const int Level_Y_Offset = 6;										// смещение игрового уровня по оси Y от начала координат экрана
-const int Circle_Size = 7;											// размер шарика платформы
+const int Global_Scale = 4;											// РіР»РѕР±Р°Р»СЊРЅС‹Р№ РјР°СЃС€С‚Р°Р± РІСЃРµС… СЌР»РµРјРµРЅС‚РѕРІ РёРіСЂС‹
+const int Brick_Width = 15;											// С€РёСЂРёРЅР° СЌР»РµРјРµРЅС‚Р° РёРіСЂС‹ РєРёСЂРїРёС‡
+const int Brick_Height = 7;											// РІС‹СЃРѕС‚Р° СЌР»РµРјРµРЅС‚Р° РёРіСЂС‹ РєРёСЂРїРёС‡
+const int Cell_Width = Brick_Width + 1;					// С€РёСЂРёРЅР° СЏС‡РµР№РєРё (РєРёСЂРїРёС‡ + 1 РїРёРєСЃРµР»СЊРЅС‹Р№ РѕС‚СЃС‚СѓРї)
+const int Cell_Height = Brick_Height + 1;				// РІС‹СЃРѕС‚Р° СЏС‡РµР№РєРё (РєРёСЂРїРёС‡ + 1 РїРёРєСЃРµР»СЊРЅС‹Р№ РѕС‚СЃС‚СѓРї)
+const int Level_X_Offset = 8;										// СЃРјРµС‰РµРЅРёРµ РёРіСЂРѕРІРѕРіРѕ СѓСЂРѕРІРЅСЏ РїРѕ РѕСЃРё X РѕС‚ РЅР°С‡Р°Р»Р° РєРѕРѕСЂРґРёРЅР°С‚ СЌРєСЂР°РЅР°
+const int Level_Y_Offset = 6;										// СЃРјРµС‰РµРЅРёРµ РёРіСЂРѕРІРѕРіРѕ СѓСЂРѕРІРЅСЏ РїРѕ РѕСЃРё Y РѕС‚ РЅР°С‡Р°Р»Р° РєРѕРѕСЂРґРёРЅР°С‚ СЌРєСЂР°РЅР°
+const int Circle_Size = 7;											// СЂР°Р·РјРµСЂ С€Р°СЂРёРєР° РїР»Р°С‚С„РѕСЂРјС‹
 
-int Inner_Width = 21;														// ширина платформы между шариками
+int Inner_Width = 21;														// С€РёСЂРёРЅР° РїР»Р°С‚С„РѕСЂРјС‹ РјРµР¶РґСѓ С€Р°СЂРёРєР°РјРё
 
-char Level_01[14][12] = {												// Массив игрового уровня
+char Level_01[14][12] = {												// РњР°СЃСЃРёРІ РёРіСЂРѕРІРѕРіРѕ СѓСЂРѕРІРЅСЏ
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -46,18 +55,19 @@ void Create_Pen_Brush(unsigned char r, unsigned char g, unsigned char b, HPEN& p
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Init()
-{	//Настройка игры при старте
+{	//РќР°СЃС‚СЂРѕР№РєР° РёРіСЂС‹ РїСЂРё СЃС‚Р°СЂС‚Рµ
 	Hightlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
+	Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(255, 255, 255));
 
 	Create_Pen_Brush(255, 60, 55, Brick_Red_pen, Brick_Red_brush);
-	Create_Pen_Brush(85, 250, 155, Brick_Blue_pen, Brick_Blue_brush);
+	Create_Pen_Brush(0, 250, 255, Brick_Blue_pen, Brick_Blue_brush);
 	Create_Pen_Brush(151, 0, 0, Platform_Circle_pen, Platform_Circle_brush);
 	Create_Pen_Brush(0, 128, 192, Platform_Inner_pen, Platform_Inner_brush);
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
-{	//Отрисовка элемента игры - кирпича
+{	//РћС‚СЂРёСЃРѕРІРєР° СЌР»РµРјРµРЅС‚Р° РёРіСЂС‹ - РєРёСЂРїРёС‡Р°
 
 	HPEN pen;
 	HBRUSH brush;
@@ -85,24 +95,135 @@ void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 		2 * Global_Scale, 2 * Global_Scale);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void Set_Brick_Letter_Colors(bool is_switch_color, EBrick_Type brick_type, HPEN& front_pen, HPEN& back_pen, HBRUSH& front_brush, HBRUSH& back_brush) 
+{
+	if (is_switch_color) 
+	{
+		front_pen = Brick_Red_pen;
+		front_brush = Brick_Red_brush;
+
+		back_pen = Brick_Blue_pen;
+		back_brush = Brick_Blue_brush;
+	}
+	else 
+	{
+		front_pen = Brick_Blue_pen;
+		front_brush = Brick_Blue_brush;
+
+		back_pen = Brick_Red_pen;
+		back_brush = Brick_Red_brush;
+	}
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step) 
+{// Р’С‹РІРѕРґ РІСЂР°С‰РµРЅРёСЏ РїР°РґР°СЋС‰РµРіРѕ РєРёСЂРїРёС‡Р°
+
+	bool switch_color;
+	double offset = 0.0;
+	double rotation_angle = 0.0; //РџСЂРµРѕСЂР°Р±Р·РѕРІР°РЅРёРµ С€Р°РіР° РІ СѓРіРѕР» РїРѕРІРѕСЂРѕС‚Р°
+	int brick_half_height = Brick_Height * Global_Scale / 2;
+	int back_part_offset = 0;
+	HPEN front_pen, back_pen;
+	HBRUSH front_brush, back_brush;
+
+	XFORM xform, old_xform;
+
+	if (brick_type != EBrick_Type::Blue && brick_type != EBrick_Type::Red) 
+	{
+		return; // РўРѕР»СЊРєРѕ РіРѕР»СѓР±С‹Рµ РёР»Рё РєСЂР°СЃРЅС‹Рµ РєРёСЂРїРёС‡Рё
+	}
+
+	rotation_step = rotation_step % 16; // Р”РµР»Р°СЋ С‚Р°Рє, С‡С‚РѕР±С‹ С€Р°РіРѕРІ Р±С‹Р»Рѕ РІСЃРµРіРґР° РјРµРЅСЊС€Рµ 16
+
+	if (rotation_step < 8)
+		rotation_angle = 2.0 * M_PI / 16.0 * static_cast<double>(rotation_step);
+	else
+		rotation_angle = 2.0 * M_PI / 16.0 * static_cast<double>(8 - rotation_step);
+
+	if (rotation_step > 4 && rotation_step < 13) // СЃ 5 РїРѕ 12 С€Р°РіРё С†РІРµС‚ РѕСЃРЅРѕРІРЅРѕРіРѕ С†РІРµС‚Р° РєРёСЂРїРёС‡Р° РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РєСЂР°СЃРЅС‹Р№, РІ РѕСЃС‚Р°Р»СЊРЅРѕРј СЃР»СѓС‡Р°Рµ СЃРёРЅРёР№
+	{
+		switch_color = (brick_type == EBrick_Type::Blue); // Р•СЃР»Рё С†РІРµС‚ РєРёСЂРїРёС‡Р° СЃРёРЅРёР№, С‚Рѕ РјРµРЅСЏРµРј С†РІРµС‚ РїРµСЂРµРІРѕСЂРѕС‚Р°
+	}
+	else 
+	{
+		switch_color = (brick_type == EBrick_Type::Red);  // Р•СЃР»Рё С†РІРµС‚ РєРёСЂРїРёС‡Р° РєСЂР°СЃРЅС‹Р№, С‚Рѕ РјРµРЅСЏРµРј С†РІРµС‚ РєРёСЂРїРёС‡Р°
+	}
+
+	Set_Brick_Letter_Colors(switch_color, brick_type, front_pen, back_pen, front_brush, back_brush);
+
+	if (rotation_step == 4 || rotation_step == 12) 
+	{
+		// Р’С‹РІРѕРґ С„РѕРЅР°
+		SelectObject(hdc, back_pen);
+		SelectObject(hdc, back_brush);
+
+		Rectangle(hdc, x, y + brick_half_height - Global_Scale, x + Brick_Width * Global_Scale, y + brick_half_height);
+
+		// Р’С‹РІРѕРґ РїРµСЂРµРґРЅРµРіРѕ РїР»Р°РЅР°
+		SelectObject(hdc, front_pen);
+		SelectObject(hdc, front_brush);
+
+		Rectangle(hdc, x, y + brick_half_height, x + Brick_Width * Global_Scale, y + brick_half_height + Global_Scale - 1);
+	}
+	else {
+		SetGraphicsMode(hdc, GM_ADVANCED);
+
+		// РќР°СЃС‚СЂР°РёРІР°РЅРёРµ РјР°С‚СЂРёС†С‹ РїРµСЂРµРІРѕСЂРѕС‚Р° РєРёСЂРїРёС‡Р°
+		xform.eM11 = 1.0f;
+		xform.eM12 = 0.0f;
+		xform.eM21 = 0.0f;
+		xform.eM22 = static_cast<float>(cos(rotation_angle));
+		xform.eDx  = static_cast<float>(x);
+		xform.eDy  = static_cast<float>(y + brick_half_height);
+
+		GetWorldTransform(hdc, &old_xform);
+		SetWorldTransform(hdc, &xform);
+
+		// Р’С‹РІРѕРґ С„РѕРЅР°
+		SelectObject(hdc, back_pen);
+		SelectObject(hdc, back_brush);
+
+		offset = 3.0 * (1.0 - abs(xform.eM22)) * static_cast<double>(Global_Scale);
+		back_part_offset = static_cast<int>(round(offset));
+		Rectangle(hdc, 0, -brick_half_height - back_part_offset, Brick_Width * Global_Scale, brick_half_height - back_part_offset);
+
+		// Р’С‹РІРѕРґ РїРµСЂРµРґРЅРµРіРѕ РїР»Р°РЅР°
+		SelectObject(hdc, front_pen);
+		SelectObject(hdc, front_brush);
+
+		Rectangle(hdc, 0, -brick_half_height, Brick_Width * Global_Scale, brick_half_height);
+		if (rotation_step > 4 && rotation_step < 13)
+		{
+			if (letter_type == ELetter_Type::O)
+			{
+				SelectObject(hdc, Letter_Pen);
+				Ellipse(hdc, 0 + 5 * Global_Scale, -5 * Global_Scale / 2, 0 + 10 * Global_Scale, 5 * Global_Scale / 2);
+			}
+		}
+
+
+		SetWorldTransform(hdc, &old_xform);
+	}
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Draw_Level(HDC hdc)
-{	//Отрисовка уровня игры
+{	//РћС‚СЂРёСЃРѕРІРєР° СѓСЂРѕРІРЅСЏ РёРіСЂС‹
 	for (int i = 0; i < 14; ++i) 
 		for (int j = 0; j < 12; ++j) 
 			Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(Level_01[i][j]));
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Draw_Platform(HDC hdc, int x, int y)
-{	//Отрисовка элемента игры Платформа
+{	//РћС‚СЂРёСЃРѕРІРєР° СЌР»РµРјРµРЅС‚Р° РёРіСЂС‹ РџР»Р°С‚С„РѕСЂРјР°
 	
-	// 1. Рисуем боковые шарики платформы
+	// 1. Р РёСЃСѓРµРј Р±РѕРєРѕРІС‹Рµ С€Р°СЂРёРєРё РїР»Р°С‚С„РѕСЂРјС‹
 	SelectObject(hdc, Platform_Circle_pen);
 	SelectObject(hdc, Platform_Circle_brush);
 
 	Ellipse(hdc, x * Global_Scale, y * Global_Scale, (x + Circle_Size) * Global_Scale, (y + Circle_Size) * Global_Scale);
 	Ellipse(hdc, (x + Inner_Width) * Global_Scale, y * Global_Scale, (x + Inner_Width + Circle_Size) * Global_Scale, (y + Circle_Size) * Global_Scale);
 
-	// 2. Рисуем блик на левом шарике
+	// 2. Р РёСЃСѓРµРј Р±Р»РёРє РЅР° Р»РµРІРѕРј С€Р°СЂРёРєРµ
 	SelectObject(hdc, Hightlight_Pen);
 
 	Arc(hdc, (x + 1) * Global_Scale, (y + 1) * Global_Scale, (x + Circle_Size - 1) * Global_Scale, (y + Circle_Size - 1) * Global_Scale, 
@@ -110,7 +231,7 @@ void Draw_Platform(HDC hdc, int x, int y)
 	Arc(hdc, (x + 1) * Global_Scale + 1, (y + 1) * Global_Scale + 1, (x + Circle_Size - 1) * Global_Scale, (y + Circle_Size - 1) * Global_Scale, 
 					 (x + 1 + 1) * Global_Scale, (y + 1) * Global_Scale, (x + 1) * Global_Scale, (y + 1 + 3) * Global_Scale);
 
-	// 3. Рисуем платформу между шариками
+	// 3. Р РёСЃСѓРµРј РїР»Р°С‚С„РѕСЂРјСѓ РјРµР¶РґСѓ С€Р°СЂРёРєР°РјРё
 	SelectObject(hdc, Platform_Inner_pen);
 	SelectObject(hdc, Platform_Inner_brush);
 
@@ -118,8 +239,15 @@ void Draw_Platform(HDC hdc, int x, int y)
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Draw_Frame(HDC hdc) 
-{	//Отрисовка экрана игры
-	Draw_Level(hdc);
-	Draw_Platform(hdc, 50, 100);
+{	//РћС‚СЂРёСЃРѕРІРєР° СЌРєСЂР°РЅР° РёРіСЂС‹
+	//Draw_Level(hdc);
+	//Draw_Platform(hdc, 50, 100);
+
+	for (int i = 0; i < 16; ++i) {
+		Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
+		Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);
+	}
+
+	
 }    
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
