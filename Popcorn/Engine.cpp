@@ -16,8 +16,9 @@ enum class EBrick_Type
 	Blue
 };
 
-HPEN Letter_Pen, Hightlight_Pen, Brick_Red_pen, Brick_Blue_pen, Platform_Circle_pen, Platform_Inner_pen;
-HBRUSH Brick_Red_brush, Brick_Blue_brush, Platform_Circle_brush, Platform_Inner_brush;
+HWND Hwnd;
+HPEN BG_Pen, Letter_Pen, Hightlight_Pen, Brick_Red_pen, Brick_Blue_pen, Platform_Circle_pen, Platform_Inner_pen;
+HBRUSH BG_Brush, Brick_Red_brush, Brick_Blue_brush, Platform_Circle_brush, Platform_Inner_brush;
 
 const int Global_Scale = 4;											// глобальный масштаб всех элементов игры
 const int Brick_Width = 15;											// ширина элемента игры кирпич
@@ -26,11 +27,22 @@ const int Cell_Width = Brick_Width + 1;					// ширина ячейки (кир
 const int Cell_Height = Brick_Height + 1;				// высота ячейки (кирпич + 1 пиксельный отступ)
 const int Level_X_Offset = 8;										// смещение игрового уровня по оси X от начала координат экрана
 const int Level_Y_Offset = 6;										// смещение игрового уровня по оси Y от начала координат экрана
+const int Level_Width = 14;											// ширина уровня в КИРПИЧАХ
+const int Level_Height = 12;										// высота уровня в КИРПИЧАХ
 const int Circle_Size = 7;											// размер шарика платформы
+const int Platform_Y_Pos = 185;									// положение платформы по оси y
+const int Platform_Height = 7;									// высота всей платформы (не меняется)
 
 int Inner_Width = 21;														// ширина платформы между шариками
+int Platform_X_Pos = 0;													// положение платформы по оси x
+int Platform_X_Step = Global_Scale * 2;					// смещение платформы по оси x
+int Platform_Width = 28;												// ширина всей платформы (иеняется в зависимости от ситуации в игре)
 
-char Level_01[14][12] = {												// Массив игрового уровня
+
+RECT Platform_Rect, Prev_Platform_Rect;
+RECT Level_Rect;
+
+char Level_01[14][12] = {												// массив игрового уровня
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -52,17 +64,43 @@ void Create_Pen_Brush(unsigned char r, unsigned char g, unsigned char b, HPEN& p
 	pen = CreatePen(PS_SOLID, 0, RGB(r, g, b));
 	brush = CreateSolidBrush(RGB(r, g, b));
 }
-
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Init()
+void Redraw_Platform() 
+{
+	Prev_Platform_Rect = Platform_Rect;
+
+	Platform_Rect.left = (Level_X_Offset + Platform_X_Pos) * Global_Scale;
+	Platform_Rect.top = Platform_Y_Pos * Global_Scale;
+	Platform_Rect.right = Platform_Rect.left + Platform_Width * Global_Scale;
+	Platform_Rect.bottom = Platform_Rect.top + Platform_Height * Global_Scale;
+
+	InvalidateRect(Hwnd, &Prev_Platform_Rect, FALSE);
+	InvalidateRect(Hwnd, &Platform_Rect, FALSE);
+}    
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void Init_Engine(HWND hwnd)
 {	//Настройка игры при старте
+
+	Hwnd = hwnd;
+
 	Hightlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
 	Letter_Pen = CreatePen(PS_SOLID, Global_Scale, RGB(255, 255, 255));
 
-	Create_Pen_Brush(255, 60, 55, Brick_Red_pen, Brick_Red_brush);
-	Create_Pen_Brush(0, 250, 255, Brick_Blue_pen, Brick_Blue_brush);
+	// создание кистей и карандашей
+	Create_Pen_Brush(15, 63, 31, BG_Pen, BG_Brush);
+	Create_Pen_Brush(255, 85, 85, Brick_Red_pen, Brick_Red_brush);
+	Create_Pen_Brush(85, 255, 255, Brick_Blue_pen, Brick_Blue_brush);
 	Create_Pen_Brush(151, 0, 0, Platform_Circle_pen, Platform_Circle_brush);
 	Create_Pen_Brush(0, 128, 192, Platform_Inner_pen, Platform_Inner_brush);
+
+	// инициализация габаритов игрового уровня
+	Level_Rect.left = Level_X_Offset * Global_Scale;
+	Level_Rect.top = Level_Y_Offset * Global_Scale;
+	Level_Rect.right = Level_Rect.left + Cell_Width * Level_Width * Global_Scale;
+	Level_Rect.bottom = Level_Rect.top + Cell_Height * Level_Height * Global_Scale;
+
+	// очищение области платформы при первом запуске (чтобы не оставался след при первом перемещении платформы)
+	Redraw_Platform();
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -71,8 +109,6 @@ void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 
 	HPEN pen;
 	HBRUSH brush;
-
-
 
 	switch (brick_type)
 	{
@@ -215,7 +251,12 @@ void Draw_Level(HDC hdc)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void Draw_Platform(HDC hdc, int x, int y)
 {	//Отрисовка элемента игры Платформа
+
+	SelectObject(hdc, BG_Pen);
+	SelectObject(hdc, BG_Brush);
 	
+	Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
+
 	// 1. Рисуем боковые шарики платформы
 	SelectObject(hdc, Platform_Circle_pen);
 	SelectObject(hdc, Platform_Circle_brush);
@@ -238,16 +279,44 @@ void Draw_Platform(HDC hdc, int x, int y)
 	RoundRect(hdc, (x + 4) * Global_Scale, (y + 1) * Global_Scale, (x + 4 + Inner_Width - 1) * Global_Scale, (y + 1 + 5) * Global_Scale, 4 * Global_Scale, 4 * Global_Scale);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Frame(HDC hdc) 
+void Draw_Frame(HDC hdc, RECT& paint_area) 
 {	//Отрисовка экрана игры
-	//Draw_Level(hdc);
-	//Draw_Platform(hdc, 50, 100);
 
-	for (int i = 0; i < 16; ++i) {
-		Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
-		Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);
+	RECT intersection_rect;									// вспомогательный прямоугольник для определения пересечения областей перерисовки
+
+	if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect))				// определение пересечения области рисования и перерисовки кадра
+	{
+		Draw_Level(hdc);
+	}
+	if (IntersectRect(&intersection_rect, &paint_area, &Platform_Rect))				// определение пересечения области рисования и перерисовки кадра
+	{
+		Draw_Platform(hdc, Level_X_Offset + Platform_X_Pos, Platform_Y_Pos);
 	}
 
-	
+
+	//for (int i = 0; i < 16; ++i) {
+	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
+	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);
+	//}
 }    
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+int On_Key_Down(EKey_Type key_type) 
+{
+	switch (key_type)
+	{
+	case EKey_Type::Left:
+		Platform_X_Pos -= Platform_X_Step;
+		Redraw_Platform();
+		break;
+
+	case EKey_Type::Right:
+		Platform_X_Pos += Platform_X_Step;
+		Redraw_Platform();
+		break;
+
+	case EKey_Type::Space:
+		break;
+	}
+	return 0;
+}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
