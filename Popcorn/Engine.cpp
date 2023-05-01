@@ -1,61 +1,6 @@
 ﻿#include "Engine.h"
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-enum class ELetter_Type
-{
-	None,
-	O
-};
-
-enum class EBrick_Type
-{
-	None,
-	Red,
-	Blue
-};
-
-HWND Hwnd;
-HPEN BG_Pen, Letter_Pen, Hightlight_Pen, Brick_Red_pen, Brick_Blue_pen, Platform_Circle_pen, Platform_Inner_pen, 
-		 Ball_Pen, Border_Blue_Pen, Border_White_Pen;
-HBRUSH BG_Brush, Brick_Red_brush, Brick_Blue_brush, Platform_Circle_brush, Platform_Inner_brush, Ball_Brush, 
-			 Border_Blue_Brush, Border_White_Brush;
-
-const int Global_Scale = 4;											// глобальный масштаб всех элементов игры
-const int Brick_Width = 15;											// ширина элемента игры кирпич
-const int Brick_Height = 7;											// высота элемента игры кирпич
-const int Cell_Width = Brick_Width + 1;					// ширина ячейки (кирпич + 1 пиксельный отступ)
-const int Cell_Height = Brick_Height + 1;				// высота ячейки (кирпич + 1 пиксельный отступ)
-const int Level_X_Offset = 8;										// смещение игрового уровня по оси X от начала координат экрана
-const int Level_Y_Offset = 6;										// смещение игрового уровня по оси Y от начала координат экрана
-const int Level_Width = 12;											// ширина уровня в КИРПИЧАХ
-const int Level_Height = 14;										// высота уровня в КИРПИЧАХ
-const int Circle_Size = 7;											// размер шарика платформы
-const int Platform_Y_Pos = 185;									// положение платформы по оси y
-const int Platform_Height = 7;									// высота всей платформы (не меняется)
-const int Ball_Size = 4;												// размер шарика
-const int Max_X_Pos = Level_X_Offset + Cell_Width * Level_Width;		// максимальноый Х уровня
-const int Max_Y_Pos = 199 - Ball_Size;					// максимальный У уровня
-const int Border_X_Offset = 6;									// координаты минимальной границы рамки по Х
-const int Border_Y_Offset = 4;									// координаты минимальной границы рамки по У
-
-int Inner_Width = 21;														// ширина платформы между шариками
-int Platform_X_Pos = Border_X_Offset;						// положение платформы по оси x
-int Platform_X_Step = Global_Scale * 2;					// смещение платформы по оси x
-int Platform_Width = 28;												// ширина всей платформы (иеняется в зависимости от ситуации в игре)
-int Ball_X_Pos = 20;														// положение шарика по оси Х
-int Ball_Y_Pos = 170;														// положение шарика по оси У
-double Ball_Speed = 4.0;												// скорость смещения шарика
-double Ball_Direction = M_PI - M_PI_4;									// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
-	
-
-
-RECT Platform_Rect, Prev_Platform_Rect;
-RECT Level_Rect;
-RECT Ball_Rect, Prev_Ball_Rect;
-
-char Level_01[Level_Height][Level_Width] = {												// массив игрового уровня
+char Level_01[CsEngine::Level_Height][CsEngine::Level_Width] = {												// массив игрового уровня
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -72,26 +17,18 @@ char Level_01[Level_Height][Level_Width] = {												// массив игро
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 };
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Create_Pen_Brush(unsigned char r, unsigned char g, unsigned char b, HPEN& pen, HBRUSH& brush)
-{
-	pen = CreatePen(PS_SOLID, 0, RGB(r, g, b));
-	brush = CreateSolidBrush(RGB(r, g, b));
-}
+CsEngine::CsEngine() :
+	Inner_Width(21),														// ширина платформы между шариками
+	Platform_X_Pos(Border_X_Offset),						// положение платформы по оси x
+	Platform_X_Step(Global_Scale * 2),					// смещение платформы по оси x
+	Platform_Width(28),													// ширина всей платформы (иеняется в зависимости от ситуации в игре)
+	Ball_X_Pos(20),															// положение шарика по оси Х
+	Ball_Y_Pos(170),														// положение шарика по оси У
+	Ball_Speed(4.0),														// скорость смещения шарика
+	Ball_Direction( M_PI - M_PI_4)							// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
+{}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Redraw_Platform() 
-{
-	Prev_Platform_Rect = Platform_Rect;
-
-	Platform_Rect.left = (Platform_X_Pos) * Global_Scale;
-	Platform_Rect.top = Platform_Y_Pos * Global_Scale;
-	Platform_Rect.right = Platform_Rect.left + Platform_Width * Global_Scale;
-	Platform_Rect.bottom = Platform_Rect.top + Platform_Height * Global_Scale;
-
-	InvalidateRect(Hwnd, &Prev_Platform_Rect, FALSE);
-	InvalidateRect(Hwnd, &Platform_Rect, FALSE);
-}    
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Init_Engine(HWND hwnd)
+void CsEngine::Init_Engine(HWND hwnd)
 {	//Настройка игры при старте
 
 	Hwnd = hwnd;
@@ -121,9 +58,88 @@ void Init_Engine(HWND hwnd)
 	// установка таймера
 	SetTimer(Hwnd, Timer_Id, 50, 0);
 }
-
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
+void CsEngine::Draw_Frame(HDC hdc, RECT& paint_area) 
+{	// Отрисовка экрана игры
+
+	RECT intersection_rect;																									// вспомогательный прямоугольник для определения пересечения областей перерисовки
+
+	if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect))				// определение пересечения области рисования и перерисовки кадра
+	{
+		Draw_Level(hdc);
+	}
+	if (IntersectRect(&intersection_rect, &paint_area, &Platform_Rect))			// определение пересечения области рисования и перерисовки кадра
+	{
+		Draw_Platform(hdc, Platform_X_Pos, Platform_Y_Pos);
+	}
+	if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))					// определение пересечения области рисования и перерисовки кадра
+	{
+		Draw_Ball(hdc, paint_area);
+	}
+
+	Draw_Bounds(hdc, paint_area);
+
+	//for (int i = 0; i < 16; ++i) {
+	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
+	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);
+	//}
+
+}    
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+int CsEngine::On_Key_Down(EKey_Type key_type) 
+{
+	switch (key_type)
+	{
+	case EKey_Type::Left:
+		Platform_X_Pos -= Platform_X_Step;
+
+		if (Platform_X_Pos <= Border_X_Offset)
+			Platform_X_Pos = Border_X_Offset;
+
+		Redraw_Platform();
+		break;
+
+	case EKey_Type::Right:
+		Platform_X_Pos += Platform_X_Step;
+
+		if (Platform_X_Pos >= Max_X_Pos - Platform_Width + 1)
+			Platform_X_Pos = Max_X_Pos - Platform_Width + 1;
+
+		Redraw_Platform();
+		break;
+
+	case EKey_Type::Space:
+		break;
+	}
+	return 0;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+int CsEngine::On_Timer()
+{
+	Move_Ball();
+	return 0;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CsEngine::Create_Pen_Brush(unsigned char r, unsigned char g, unsigned char b, HPEN& pen, HBRUSH& brush)
+{
+	pen = CreatePen(PS_SOLID, 0, RGB(r, g, b));
+	brush = CreateSolidBrush(RGB(r, g, b));
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CsEngine::Redraw_Platform() 
+{
+	Prev_Platform_Rect = Platform_Rect;
+
+	Platform_Rect.left = (Platform_X_Pos) * Global_Scale;
+	Platform_Rect.top = Platform_Y_Pos * Global_Scale;
+	Platform_Rect.right = Platform_Rect.left + Platform_Width * Global_Scale;
+	Platform_Rect.bottom = Platform_Rect.top + Platform_Height * Global_Scale;
+
+	InvalidateRect(Hwnd, &Prev_Platform_Rect, FALSE);
+	InvalidateRect(Hwnd, &Platform_Rect, FALSE);
+}    
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CsEngine::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 {	//Отрисовка элемента игры - кирпича
 
 	HPEN pen;
@@ -150,7 +166,7 @@ void Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
 		2 * Global_Scale, 2 * Global_Scale);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Set_Brick_Letter_Colors(bool is_switch_color, EBrick_Type brick_type, HPEN& front_pen, HPEN& back_pen, HBRUSH& front_brush, HBRUSH& back_brush) 
+void CsEngine::Set_Brick_Letter_Colors(bool is_switch_color, EBrick_Type brick_type, HPEN& front_pen, HPEN& back_pen, HBRUSH& front_brush, HBRUSH& back_brush) 
 {
 	if (is_switch_color) 
 	{
@@ -170,7 +186,7 @@ void Set_Brick_Letter_Colors(bool is_switch_color, EBrick_Type brick_type, HPEN&
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step) 
+void CsEngine::Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Type letter_type, int rotation_step) 
 {// Вывод вращения падающего кирпича
 
 	bool switch_color;
@@ -261,14 +277,14 @@ void Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, ELetter_Ty
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Level(HDC hdc)
+void CsEngine::Draw_Level(HDC hdc)
 {	// Отрисовка уровня игры
 	for (int i = 0; i < Level_Height; ++i) 
 		for (int j = 0; j < Level_Width; ++j) 
 			Draw_Brick(hdc, Level_X_Offset + j * Cell_Width, Level_Y_Offset + i * Cell_Height, static_cast<EBrick_Type>(Level_01[i][j]));
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Platform(HDC hdc, int x, int y)
+void CsEngine::Draw_Platform(HDC hdc, int x, int y)
 {	// Отрисовка элемента игры Платформа
 
 	SelectObject(hdc, BG_Pen);
@@ -298,7 +314,7 @@ void Draw_Platform(HDC hdc, int x, int y)
 	RoundRect(hdc, (x + 4) * Global_Scale, (y + 1) * Global_Scale, (x + 4 + Inner_Width - 1) * Global_Scale, (y + 1 + 5) * Global_Scale, 4 * Global_Scale, 4 * Global_Scale);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Ball(HDC hdc, RECT& paint_area) 
+void CsEngine::Draw_Ball(HDC hdc, RECT& paint_area) 
 {	// Отрисовка шарика 
 
 	// 1. Очищаем фон
@@ -314,7 +330,7 @@ void Draw_Ball(HDC hdc, RECT& paint_area)
 	Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Border(HDC hdc, int x, int y, bool is_top_border) 
+void CsEngine::Draw_Border(HDC hdc, int x, int y, bool is_top_border) 
 {	//Отрисовка одного тайла рамки игрового поля
 
 	// Выводится основная линия рамки
@@ -347,7 +363,7 @@ void Draw_Border(HDC hdc, int x, int y, bool is_top_border)
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Bounds(HDC hdc,  RECT& paint_area) 
+void CsEngine::Draw_Bounds(HDC hdc,  RECT& paint_area) 
 {	// Отрисовка рамки из тайлов
 
 	// 1. Отрисовка левой рамки
@@ -369,64 +385,7 @@ void Draw_Bounds(HDC hdc,  RECT& paint_area)
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Draw_Frame(HDC hdc, RECT& paint_area) 
-{	// Отрисовка экрана игры
-
-	RECT intersection_rect;																									// вспомогательный прямоугольник для определения пересечения областей перерисовки
-
-	if (IntersectRect(&intersection_rect, &paint_area, &Level_Rect))				// определение пересечения области рисования и перерисовки кадра
-	{
-		Draw_Level(hdc);
-	}
-	if (IntersectRect(&intersection_rect, &paint_area, &Platform_Rect))			// определение пересечения области рисования и перерисовки кадра
-	{
-		Draw_Platform(hdc, Platform_X_Pos, Platform_Y_Pos);
-	}
-	if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))					// определение пересечения области рисования и перерисовки кадра
-	{
-		Draw_Ball(hdc, paint_area);
-	}
-
-	Draw_Bounds(hdc, paint_area);
-
-	//for (int i = 0; i < 16; ++i) {
-	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
-	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);
-	//}
-	
-	
-
-}    
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-int On_Key_Down(EKey_Type key_type) 
-{
-	switch (key_type)
-	{
-	case EKey_Type::Left:
-		Platform_X_Pos -= Platform_X_Step;
-
-		if (Platform_X_Pos <= Border_X_Offset)
-			Platform_X_Pos = Border_X_Offset;
-
-		Redraw_Platform();
-		break;
-
-	case EKey_Type::Right:
-		Platform_X_Pos += Platform_X_Step;
-
-		if (Platform_X_Pos >= Max_X_Pos - Platform_Width + 1)
-			Platform_X_Pos = Max_X_Pos - Platform_Width + 1;
-
-		Redraw_Platform();
-		break;
-
-	case EKey_Type::Space:
-		break;
-	}
-	return 0;
-}
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Check_Level_Brick_Hit(int& next_y_pos)
+void CsEngine::Check_Level_Brick_Hit(int& next_y_pos)
 {// Корректировки движения при отражении от кирпича
 
 	int brick_y_pos = Level_Y_Offset + Level_Height * Cell_Height;
@@ -448,7 +407,7 @@ void Check_Level_Brick_Hit(int& next_y_pos)
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void Move_Ball()
+void CsEngine::Move_Ball()
 {
 	int next_x_pos, next_y_pos;
 	int max_x_pos = Max_X_Pos - Ball_Size;
@@ -508,8 +467,3 @@ void Move_Ball()
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-int On_Timer()
-{
-	Move_Ball();
-	return 0;
-}
