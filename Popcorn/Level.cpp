@@ -1,6 +1,6 @@
 ﻿#include "Level.h"
 
-char Level_01[CsConfig::Level_Height][CsConfig::Level_Width] = {												// массив игрового уровня
+char CLevel::Level_01[CsConfig::Level_Height][CsConfig::Level_Width] = {												// массив игрового уровня
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -16,6 +16,9 @@ char Level_01[CsConfig::Level_Height][CsConfig::Level_Width] = {												// �
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 };
+
+
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CLevel::CLevel() :
 	Brick_Red_pen(0),
@@ -64,7 +67,7 @@ void CLevel::Check_Level_Brick_Hit(int& next_y_pos, double& ball_direction)
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CLevel::Draw(HDC hdc, RECT& paint_area)
+void CLevel::Draw(HWND hwnd, HDC hdc, RECT& paint_area)
 {	// Отрисовка уровня игры
 	RECT  intersection_rect;																								// вспомогательный прямоугольник для определения пересечения областей перерисовки
 
@@ -74,6 +77,8 @@ void CLevel::Draw(HDC hdc, RECT& paint_area)
 	for (int i = 0; i < CsConfig::Level_Height; ++i) 
 		for (int j = 0; j < CsConfig::Level_Width; ++j) 
 			Draw_Brick(hdc, CsConfig::Level_X_Offset + j * CsConfig::Cell_Width, CsConfig::Level_Y_Offset + i * CsConfig::Cell_Height, static_cast<EBrick_Type>(Level_01[i][j]));
+	
+	Active_Brick.Draw(hdc, paint_area);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CLevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)
@@ -141,6 +146,7 @@ void CLevel::Draw_Brick_Letter(HDC hdc, int x, int y, EBrick_Type brick_type, EL
 		return; // Только голубые или красные кирпичи
 	}
 
+	// Корректировка шага вращения и угла поворота
 	rotation_step = rotation_step % 16; // Делаю так, чтобы шагов было всегда меньше 16
 
 	if (rotation_step < 8)

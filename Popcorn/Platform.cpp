@@ -30,7 +30,7 @@ void CsPlatform::Redraw(HWND hwnd)
 	Prev_Platform_Rect = Platform_Rect;
 
 	Platform_Rect.left = (X_Pos) * CsConfig::Global_Scale;
-	Platform_Rect.top = CsConfig::Y_Pos * CsConfig::Global_Scale;
+	Platform_Rect.top = CsConfig::Platform_Y_Pos * CsConfig::Global_Scale;
 	Platform_Rect.right = Platform_Rect.left + Width * CsConfig::Global_Scale;
 	Platform_Rect.bottom = Platform_Rect.top + Height * CsConfig::Global_Scale;
 
@@ -47,7 +47,7 @@ void CsPlatform::Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush)
 		return;
 
 	int x = X_Pos;
-	int y = CsConfig::Y_Pos;
+	int y = CsConfig::Platform_Y_Pos;
 
 	SelectObject(hdc, bg_pen);
 	SelectObject(hdc, bg_brush);

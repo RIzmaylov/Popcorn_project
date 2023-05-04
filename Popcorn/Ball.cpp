@@ -41,7 +41,7 @@ void CBall::Move(HWND hwnd, CLevel* level, int platform_x_pos, int platform_widt
 {
 	int next_x_pos, next_y_pos;
 	int max_x_pos = CsConfig::Max_X_Pos - CsConfig::Ball_Size;
-	int platform_y_pos = CsConfig::Y_Pos - CsConfig::Ball_Size;
+	int platform_y_pos = CsConfig::Platform_Y_Pos - CsConfig::Ball_Size;
 
 	Prev_Ball_Rect = Ball_Rect;
 

@@ -13,11 +13,11 @@ public:
 	void Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush);
 	void Move(HWND hwnd, CLevel* level, int platform_x_pos, int platform_width);
 
+private:
 	HPEN Ball_Pen;
 	HBRUSH Ball_Brush;
 	double Ball_Direction;																										// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
 
-private:
 	int Ball_X_Pos;																														// положение шарика по оси Х
 	int Ball_Y_Pos;																														// положение шарика по оси У
 	double Ball_Speed;																												// скорость смещения шарика

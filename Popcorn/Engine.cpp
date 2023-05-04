@@ -22,13 +22,13 @@ void CsEngine::Init_Engine(HWND hwnd)
 	Platform.Redraw(Hwnd);
 
 	// установка таймера
-	SetTimer(Hwnd, Timer_Id, 50, 0);
+	SetTimer(Hwnd, Timer_Id, 1000 / CsConfig::FPS, 0);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsEngine::Draw_Frame(HDC hdc, RECT& paint_area) 
 {	// Отрисовка экрана игры
 
-	Level.Draw(hdc, paint_area);
+	Level.Draw(Hwnd, hdc, paint_area);
 
 	Platform.Draw(hdc, paint_area, BG_Pen, BG_Brush);
 	
@@ -73,6 +73,9 @@ int CsEngine::On_Key_Down(EKey_Type key_type)
 int CsEngine::On_Timer()
 {
 	Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
+
+	Level.Active_Brick.Act(Hwnd);
+
 	return 0;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------

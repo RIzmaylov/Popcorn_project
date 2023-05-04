@@ -26,12 +26,11 @@ public:
 	int On_Key_Down(EKey_Type key_type);
 	int On_Timer();
 
+private:
 	HWND Hwnd;
 	HPEN BG_Pen;
 	HBRUSH BG_Brush;
 
-
-private:
 	CBall Ball;
 	CLevel Level;
 	CsPlatform Platform;
