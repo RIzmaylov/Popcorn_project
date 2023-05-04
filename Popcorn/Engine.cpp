@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CsEngine::CsEngine() :
-	Hwnd(0), BG_Pen(0), BG_Brush(0)
+	Hwnd(0)
 {}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsEngine::Init_Engine(HWND hwnd)
@@ -10,8 +10,9 @@ void CsEngine::Init_Engine(HWND hwnd)
 
 	Hwnd = hwnd;
 
-	// создание кистей и карандашей
-	CsConfig::Create_Pen_Brush(15, 63, 31, BG_Pen, BG_Brush);
+	// создание кистей и карандашей фона и кирпичей
+	CActive_Brick::Setup_Colors();
+
 	Border.Init();
 	Platform.Init();
 	Ball.Init();
@@ -30,11 +31,11 @@ void CsEngine::Draw_Frame(HDC hdc, RECT& paint_area)
 
 	Level.Draw(Hwnd, hdc, paint_area);
 
-	Platform.Draw(hdc, paint_area, BG_Pen, BG_Brush);
+	Platform.Draw(hdc, paint_area);
 	
-	Ball.Draw(hdc, paint_area, BG_Pen, BG_Brush);
+	Ball.Draw(hdc, paint_area);
 
-	Border.Draw(hdc, paint_area, BG_Pen, BG_Brush);
+	Border.Draw(hdc, paint_area);
 
 	//for (int i = 0; i < 16; ++i) {
 	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);

@@ -17,7 +17,7 @@ void CBall::Init()
 	CsConfig::Create_Pen_Brush(255, 255, 255, Ball_Pen, Ball_Brush);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CBall::Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush) 
+void CBall::Draw(HDC hdc, RECT& paint_area) 
 {	// Отрисовка шарика 
 	RECT intersection_rect;																										// вспомогательный прямоугольник для определения пересечения областей перерисовки
 
@@ -25,8 +25,8 @@ void CBall::Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush)
 		return;
 
 	// 1. Очищаем фон
-	SelectObject(hdc, bg_pen);
-	SelectObject(hdc, bg_brush);
+	SelectObject(hdc, CsConfig::BG_Pen);
+	SelectObject(hdc, CsConfig::BG_Brush);
 
 	Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
 

@@ -5,10 +5,29 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+class CColor
+{
+public:
+	CColor(unsigned char r, unsigned char g, unsigned char b);
+	unsigned char R, G, B;
+};
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 class CsConfig
 {
 public:
+	static void Setup_Colors();
+	static void Create_Pen_Brush(const CColor& color, HPEN& pen, HBRUSH& brush);
 	static void Create_Pen_Brush(unsigned char r, unsigned char g, unsigned char b, HPEN& pen, HBRUSH& brush);
+
+
+	static const CColor BG_Color, Red_Brick_Color, Blue_Brick_Color;
+
+	static HPEN BG_Pen;
+	static HBRUSH BG_Brush;
 
 	static const int Global_Scale = 4;																																// глобальный масштаб всех элементов игры
 	static const int FPS = 20;																																				// FPS для таймера

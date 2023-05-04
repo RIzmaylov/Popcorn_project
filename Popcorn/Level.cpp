@@ -21,6 +21,7 @@ char CLevel::Level_01[CsConfig::Level_Height][CsConfig::Level_Width] = {								
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CLevel::CLevel() :
+	Active_Brick(EBrick_Type::Blue),
 	Brick_Red_pen(0),
 	Brick_Blue_pen(0),
 	Letter_Pen(0),
@@ -34,8 +35,8 @@ void CLevel::Init()
 	Letter_Pen = CreatePen(PS_SOLID, CsConfig::Global_Scale, RGB(255, 255, 255));
 
 	// создание кистей и карандашей
-	CsConfig::Create_Pen_Brush(255, 85, 85, Brick_Red_pen, Brick_Red_brush);
-	CsConfig::Create_Pen_Brush(85, 255, 255, Brick_Blue_pen, Brick_Blue_brush);
+	CsConfig::Create_Pen_Brush(CsConfig::Red_Brick_Color, Brick_Red_pen, Brick_Red_brush);
+	CsConfig::Create_Pen_Brush(CsConfig::Blue_Brick_Color, Brick_Blue_pen, Brick_Blue_brush);
 
 	// инициализация габаритов игрового уровня
 	Level_Rect.left = CsConfig::Level_X_Offset * CsConfig::Global_Scale;

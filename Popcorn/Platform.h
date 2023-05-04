@@ -9,7 +9,7 @@ public:
 	void Init();
 
 	void Redraw(HWND hwnd); 
-	void Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush);
+	void Draw(HDC hdc, RECT& paint_area);
 
 	int X_Pos;																																// положение платформы по оси x
 	int X_Step;																																// смещение платформы по оси x

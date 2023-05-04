@@ -39,7 +39,7 @@ void CsPlatform::Redraw(HWND hwnd)
 }    
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CsPlatform::Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush)
+void CsPlatform::Draw(HDC hdc, RECT& paint_area)
 {	// Отрисовка элемента игры Платформа
 	RECT intersection_rect;																										// вспомогательный прямоугольник для определения пересечения областей перерисовки
 
@@ -49,8 +49,8 @@ void CsPlatform::Draw(HDC hdc, RECT& paint_area, HPEN bg_pen, HBRUSH bg_brush)
 	int x = X_Pos;
 	int y = CsConfig::Platform_Y_Pos;
 
-	SelectObject(hdc, bg_pen);
-	SelectObject(hdc, bg_brush);
+	SelectObject(hdc, CsConfig::BG_Pen);
+	SelectObject(hdc, CsConfig::BG_Brush);
 
 	Rectangle(hdc, Prev_Platform_Rect.left, Prev_Platform_Rect.top, Prev_Platform_Rect.right, Prev_Platform_Rect.bottom);
 
