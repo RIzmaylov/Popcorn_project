@@ -22,7 +22,9 @@ public:
 	static void Setup_Colors();
 	static void Create_Pen_Brush(const CColor& color, HPEN& pen, HBRUSH& brush);
 	static void Create_Pen_Brush(unsigned char r, unsigned char g, unsigned char b, HPEN& pen, HBRUSH& brush);
+	static int Rand(int range);
 
+	static int Current_Timer_Tick;
 
 	static const CColor BG_Color, Red_Brick_Color, Blue_Brick_Color;
 
@@ -46,7 +48,7 @@ public:
 	static const int Border_X_Offset = 6;																															// координаты минимальной границы рамки по Х
 	static const int Border_Y_Offset = 4;																															// координаты минимальной границы рамки по У
 	static const int Max_X_Pos = Level_X_Offset + Cell_Width * Level_Width;														// максимальноый Х уровня
-	static const int Max_Y_Pos = 199 - Ball_Size;																											// максимальный У уровня
+	static const int Max_Y_Pos = 199;																																	// максимальный У уровня
 	static const int Platform_Y_Pos = 185;																														// положение платформы по оси y
 
 };

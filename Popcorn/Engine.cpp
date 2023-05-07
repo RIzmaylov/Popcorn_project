@@ -73,9 +73,14 @@ int CsEngine::On_Key_Down(EKey_Type key_type)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 int CsEngine::On_Timer()
 {
+	++CsConfig::Current_Timer_Tick;
+
 	Ball.Move(Hwnd, &Level, Platform.X_Pos, Platform.Width);
 
 	Level.Active_Brick.Act(Hwnd);
+
+	if (CsConfig::Current_Timer_Tick % 10 == 0)
+		Platform.Act(Hwnd);
 
 	return 0;
 }
