@@ -12,6 +12,8 @@ const CColor CsConfig::Blue_Brick_Color(85, 255, 255);
 
 HPEN CsConfig::BG_Pen;
 HBRUSH CsConfig::BG_Brush;
+HWND CsConfig::Hwnd;
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsConfig::Setup_Colors()
 {

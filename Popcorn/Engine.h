@@ -27,8 +27,6 @@ public:
 	int On_Timer();
 
 private:
-	HWND Hwnd;
-
 	CBall Ball;
 	CLevel Level;
 	CsPlatform Platform;

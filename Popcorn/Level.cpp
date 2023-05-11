@@ -68,7 +68,7 @@ void CLevel::Check_Level_Brick_Hit(int& next_y_pos, double& ball_direction)
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CLevel::Draw(HWND hwnd, HDC hdc, RECT& paint_area)
+void CLevel::Draw(HDC hdc, RECT& paint_area)
 {	// Отрисовка уровня игры
 	RECT  intersection_rect;																								// вспомогательный прямоугольник для определения пересечения областей перерисовки
 

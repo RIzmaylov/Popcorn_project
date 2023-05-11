@@ -37,11 +37,12 @@ void CBall::Draw(HDC hdc, RECT& paint_area)
 	Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CBall::Move(HWND hwnd, CLevel* level, int platform_x_pos, int platform_width)
+void CBall::Move(CLevel* level, int platform_x_pos, int platform_width)
 {
 	int next_x_pos, next_y_pos;
 	int max_x_pos = CsConfig::Max_X_Pos - CsConfig::Ball_Size;
 	int platform_y_pos = CsConfig::Platform_Y_Pos - CsConfig::Ball_Size;
+	int max_y_pos = CsConfig::Max_Y_Pos - CsConfig::Ball_Size;
 
 	Prev_Ball_Rect = Ball_Rect;
 
@@ -61,13 +62,13 @@ void CBall::Move(HWND hwnd, CLevel* level, int platform_x_pos, int platform_widt
 	}
 	if (next_x_pos > max_x_pos)
 	{
-		next_x_pos = max_x_pos - (next_x_pos - max_x_pos);						// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
+		next_x_pos = max_x_pos - (next_x_pos - max_x_pos);																	// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
 		Ball_Direction = M_PI - Ball_Direction;
 	}
-	if (next_y_pos > CsConfig::Max_Y_Pos)
+	if (next_y_pos > max_y_pos)
 	{
-		next_y_pos = CsConfig::Max_Y_Pos - (next_y_pos - CsConfig::Max_Y_Pos);						// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
-		Ball_Direction = M_PI + (M_PI - Ball_Direction);
+		next_y_pos = max_y_pos - (next_y_pos - max_y_pos);																	// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
+		Ball_Direction = -Ball_Direction;
 	}
 
 	// Корректировки движения при отражении от платформы
@@ -75,7 +76,7 @@ void CBall::Move(HWND hwnd, CLevel* level, int platform_x_pos, int platform_widt
 	{
 		if (next_x_pos >= platform_x_pos && next_x_pos <= platform_x_pos + platform_width)
 		{
-			next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);						// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
+			next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);											// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
 			Ball_Direction = M_PI + (M_PI - Ball_Direction);
 		}
 	}
@@ -92,8 +93,8 @@ void CBall::Move(HWND hwnd, CLevel* level, int platform_x_pos, int platform_widt
 	Ball_Rect.right = Ball_Rect.left + CsConfig::Ball_Size * CsConfig::Global_Scale;
 	Ball_Rect.bottom = Ball_Rect.top + CsConfig::Ball_Size * CsConfig::Global_Scale;
 
-	InvalidateRect(hwnd, &Prev_Ball_Rect, FALSE);
-	InvalidateRect(hwnd, &Ball_Rect, FALSE);
+	InvalidateRect(CsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
+	InvalidateRect(CsConfig::Hwnd, &Ball_Rect, FALSE);
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------

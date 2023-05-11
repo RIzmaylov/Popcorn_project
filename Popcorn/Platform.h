@@ -6,7 +6,9 @@ enum class EPlatform_State
 {
 	Missing,
 	Normal,
-	Meltdown	
+	Meltdown,
+	Roll_In,
+	Expand_Roll_In
 };
 
 class CsPlatform
@@ -14,8 +16,9 @@ class CsPlatform
 public:
 	CsPlatform();
 	void Init();
-	void Act(HWND hwnd);
-	void Redraw(HWND hwnd); 
+	void Act();
+	void Set_State(EPlatform_State new_state);
+	void Redraw(); 
 	void Draw(HDC hdc, RECT& paint_area);
 
 	int X_Pos;																																// положение платформы по оси x
@@ -23,11 +26,16 @@ public:
 	int Width;																																// ширина всей платформы (иеняется в зависимости от ситуации в игре)
 
 private:
+	void Clear_BG(HDC hdc);
+	void Draw_Circle_Highlight(HDC hdc, int x, int y);
 	void Draw_Normal_State(HDC hdc, RECT& paint_area);
 	void Draw_Meltdown_State(HDC hdc, RECT& paint_area);
+	void Draw_Roll_In_State(HDC hdc, RECT& paint_area);
+	void Draw_Expanding_Roll_In_State(HDC hdc, RECT& paint_area);
 
 	EPlatform_State Platform_State;
 	int Inner_Width;																													// ширина платформы между шариками
+	int Rolling_Step;																													// шаг поворота шарика платформы во время вкатывания
 
 	static const int Normal_Width = 28;
 
@@ -38,7 +46,11 @@ private:
 	HBRUSH Platform_Circle_brush, Platform_Inner_brush;
 	RECT Platform_Rect, Prev_Platform_Rect;
 
-	static const int Circle_Size = 7;																					// размер шарика платформы
-	static const int Height = 7;																							// высота всей платформы (не меняется)
-	static const int Meltdown_Speed = 3;
+	static const int Circle_Size = 7;																						// размер шарика платформы
+	static const int Normal_Platform_Inner_Width = Normal_Width - Circle_Size;	// нормальная ширина средней части платформы
+	static const int Height = 7;																								// высота всей платформы (не меняется)
+	static const int Meltdown_Speed = 3;																				// скорость расплавления платформы
+	static const int Max_Rolling_Step = 8;																			// максимальный шаг вращения шарика платформы
+	static const int Roll_In_Platform_End_X_Pos = 98;														// позиция шарика после выката
+	static const int Rolling_Platform_Speed = 3;																// скорость выкатывания шарика платформы
 };

@@ -8,16 +8,16 @@ HBRUSH CActive_Brick::Fading_Blue_Brick_Brushes[Max_Fade_Step];
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CActive_Brick::CActive_Brick(EBrick_Type brick_type) :
-	Fade_Step(0), Brick_Type(brick_type)
+	Fade_Step(0), Brick_Type(brick_type), Brick_Rect{}
 {}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CActive_Brick::Act(HWND hwnd)
+void CActive_Brick::Act()
 {
 	if (Fade_Step < Max_Fade_Step - 1)
 	{
 		++Fade_Step;
 
-		InvalidateRect(hwnd, &Brick_Rect, FALSE);
+		InvalidateRect(CsConfig::Hwnd, &Brick_Rect, FALSE);
 	}
 
 }

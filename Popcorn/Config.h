@@ -30,6 +30,7 @@ public:
 
 	static HPEN BG_Pen;
 	static HBRUSH BG_Brush;
+	static HWND Hwnd;
 
 	static const int Global_Scale = 4;																																// глобальный масштаб всех элементов игры
 	static const int FPS = 20;																																				// FPS для таймера
