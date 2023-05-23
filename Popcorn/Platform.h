@@ -5,6 +5,7 @@
 enum class EPlatform_State
 {
 	Missing,
+	Ready,
 	Normal,
 	Meltdown,
 	Roll_In,
@@ -17,6 +18,7 @@ public:
 	CsPlatform();
 	void Init();
 	void Act();
+	EPlatform_State Get_State();
 	void Set_State(EPlatform_State new_state);
 	void Redraw(); 
 	void Draw(HDC hdc, RECT& paint_area);
@@ -50,7 +52,7 @@ private:
 	static const int Normal_Platform_Inner_Width = Normal_Width - Circle_Size;	// нормальная ширина средней части платформы
 	static const int Height = 7;																								// высота всей платформы (не меняется)
 	static const int Meltdown_Speed = 3;																				// скорость расплавления платформы
-	static const int Max_Rolling_Step = 8;																			// максимальный шаг вращения шарика платформы
+	static const int Max_Rolling_Step = 16;																			// максимальный шаг вращения шарика платформы
 	static const int Roll_In_Platform_End_X_Pos = 98;														// позиция шарика после выката
 	static const int Rolling_Platform_Speed = 3;																// скорость выкатывания шарика платформы
 };

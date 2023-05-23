@@ -39,6 +39,11 @@ void CsPlatform::Act()
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
+EPlatform_State CsPlatform::Get_State()
+{
+	return Platform_State;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsPlatform::Set_State(EPlatform_State new_state)
 {
 	if (Platform_State == new_state)
@@ -165,14 +170,22 @@ void CsPlatform::Draw_Meltdown_State(HDC hdc, RECT& paint_area)
 
 	int area_width, area_height;												// области перерисовки платформы с учетом масштаба
 	int x, y, y_offset;
+	int moved_column_count = 0;
+	int max_platform_y;
 	COLORREF pixel;
 	COLORREF bg_pixel = RGB(CsConfig::BG_Color.R, CsConfig::BG_Color.G, CsConfig::BG_Color.B);
 
 	area_width = Width * CsConfig::Global_Scale;
 	area_height = Height * CsConfig::Global_Scale + 1;
 
+	max_platform_y = CsConfig::Max_Y_Pos * CsConfig::Global_Scale + area_height;
+
 	for (int i = 0; i < area_width; ++i)
 	{
+		if (Meltdown_Platform_Y_Pos[i] > max_platform_y)
+			continue;
+		++moved_column_count;
+
 		y_offset = CsConfig::Rand(Meltdown_Speed) + 1;
 		x = Platform_Rect.left + i;
 
@@ -192,6 +205,9 @@ void CsPlatform::Draw_Meltdown_State(HDC hdc, RECT& paint_area)
 
 		Meltdown_Platform_Y_Pos[i] += y_offset;
 	}
+
+	if (moved_column_count == 0)
+		Platform_State = EPlatform_State::Missing;															// вся платформа сдвинулась за пределны окна, меняем состояние платформы на "пропавшую"
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsPlatform::Draw_Roll_In_State(HDC hdc, RECT& paint_area)
@@ -260,7 +276,7 @@ void CsPlatform::Draw_Expanding_Roll_In_State(HDC hdc, RECT& paint_area)
 	if (Inner_Width >= Normal_Platform_Inner_Width)
 	{
 		Inner_Width = Normal_Platform_Inner_Width;
-		Platform_State = EPlatform_State::Normal;
+		Platform_State = EPlatform_State::Ready;
 		Redraw();
 	}
 

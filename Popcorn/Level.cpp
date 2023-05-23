@@ -21,7 +21,8 @@ char CLevel::Level_01[CsConfig::Level_Height][CsConfig::Level_Width] = {								
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CLevel::CLevel() :
-	Active_Brick(EBrick_Type::Blue),
+	Has_Floor(false),
+	Active_Brick(EBrick_Type::Red),
 	Brick_Red_pen(0),
 	Brick_Blue_pen(0),
 	Letter_Pen(0),
@@ -46,7 +47,7 @@ void CLevel::Init()
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void CLevel::Check_Level_Brick_Hit(int& next_y_pos, double& ball_direction)
+void CLevel::Check_Level_Brick_Hit(double& next_y_pos, double& ball_direction)
 {// Корректировки движения при отражении от кирпича
 
 	int brick_y_pos = CsConfig::Level_Y_Offset + CsConfig::Level_Height * CsConfig::Cell_Height;

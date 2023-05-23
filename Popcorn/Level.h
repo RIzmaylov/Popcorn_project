@@ -21,9 +21,10 @@ public:
 	CLevel();
 	void Init();
 
-	void Check_Level_Brick_Hit(int& next_y_pos, double& ball_direction);
+	void Check_Level_Brick_Hit(double& next_y_pos, double& ball_direction);
 	void Draw(HDC hdc , RECT& paint_area);
 
+	bool Has_Floor;
 	CActive_Brick Active_Brick;
 
 private:
