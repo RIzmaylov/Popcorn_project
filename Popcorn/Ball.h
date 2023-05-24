@@ -27,8 +27,9 @@ public:
 	void Move();
 	EBall_State Get_State();
 	void Set_State(EBall_State new_state, double x_pos);
-
-	double Ball_Direction;																												// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
+	double Get_Direction();
+	void Set_Direction(double new_direction);
+	void Reflect(bool from_horizontal);
 
 	static void Add_Hit_Checker(CHit_Checker* hit_checker);
 
@@ -45,6 +46,7 @@ private:
 	double Center_Y_Pos;																													// положение центра шарика по оси У
 	double Ball_Speed;																														// скорость смещения шарика
 	double Rest_Distance;																													// оставшееся расстояние шарика, необходима для правильного обсчета перемещения
+	double Ball_Direction;																												// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
 
 	RECT Ball_Rect, Prev_Ball_Rect;
 

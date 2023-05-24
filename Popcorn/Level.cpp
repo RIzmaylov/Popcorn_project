@@ -32,23 +32,41 @@ CLevel::CLevel() :
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool CLevel::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 {// Корректировки движения при отражении от кирпича
-
-	int brick_y_pos = CsConfig::Level_Y_Offset + CsConfig::Level_Height * CsConfig::Cell_Height;
-
+	double brick_left_x, brick_right_x;			// вспомогательные координаты отрезка, представляющуего собой нижнюю грань очередного кирпича
+	double brick_top_y, brick_low_y;
+	double direction = ball->Get_Direction();
 	for (int i = CsConfig::Level_Height - 1; i >= 0; --i)
 	{
+		brick_top_y = CsConfig::Level_Y_Offset + i * CsConfig::Cell_Height;
+		brick_low_y = brick_top_y + CsConfig::Brick_Height;
+
 		for (int j = 0; j < CsConfig::Level_Width; ++j)
 		{
 			if (Level_01[i][j] == 0)
 				continue;
-			if (next_y_pos < brick_y_pos)
-			{
-				ball->Ball_Direction = -ball->Ball_Direction;
-				return true;
-			}
 
+			brick_left_x = CsConfig::Level_X_Offset + j * CsConfig::Cell_Width;
+			brick_right_x = brick_left_x + CsConfig::Brick_Width;
+
+			// Проверка попадания в нижнюю грань кирпича
+			if (direction >= 0 && direction < M_PI)
+			{
+				if (Hit_Circle_On_Line(next_y_pos - brick_low_y, next_x_pos, brick_left_x, brick_right_x, ball->Radius))
+				{
+					ball->Reflect(true);
+					return true;
+				}
+			}
+			// Проверка попадания в верхнюю грань кирпича
+			if (direction >= M_PI && direction <= 2.0 * M_PI)
+			{
+				if (Hit_Circle_On_Line(next_y_pos - brick_top_y, next_x_pos, brick_left_x, brick_right_x, ball->Radius))
+				{
+					ball->Reflect(true);
+					return true;
+				}
+			}
 		}
-		brick_y_pos -= CsConfig::Cell_Height;
 	}
 	return false;
 }
@@ -80,6 +98,26 @@ void CLevel::Draw(HDC hdc, RECT& paint_area)
 			Draw_Brick(hdc, CsConfig::Level_X_Offset + j * CsConfig::Cell_Width, CsConfig::Level_Y_Offset + i * CsConfig::Cell_Height, static_cast<EBrick_Type>(Level_01[i][j]));
 	
 	Active_Brick.Draw(hdc, paint_area);
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CLevel::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius)
+{// функция проверяет пересечение горизонтального отрезка (проходящего от left_x до right_x через y) с окружностью радиусом radius
+	// x * x + y * y = R * R - формула окружности для определения пересечения мячика с кирпичем
+	double x;														// вспомогательные координаты точки окружности относительно центра для определения пересечения
+	double min_x, max_x;
+
+	if (y > radius)
+		return false;
+
+	x = sqrt(radius * radius - y * y);
+
+	min_x = next_x_pos - x;
+	max_x = next_x_pos + x;
+
+	if (max_x >= left_x && max_x <= right_x || min_x >= left_x && min_x <= right_x)
+		return true;
+	else
+		return false;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CLevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)

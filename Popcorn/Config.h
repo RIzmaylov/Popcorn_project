@@ -45,8 +45,6 @@ public:
 	static const int Cell_Width = Brick_Width + 1;																										// ширина ячейки (кирпич + 1 пиксельный отступ)
 	static const int Cell_Height = Brick_Height + 1;																									// высота ячейки (кирпич + 1 пиксельный отступ)
 
-	static const int Ball_Size = 4;																																		// размер шарика
-
 	static const int Border_X_Offset = 6;																															// координаты минимальной границы рамки по Х
 	static const int Border_Y_Offset = 4;																															// координаты минимальной границы рамки по У
 	static const int Max_X_Pos = Level_X_Offset + Cell_Width * Level_Width;														// максимальноый Х уровня

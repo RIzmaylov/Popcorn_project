@@ -44,24 +44,24 @@ bool CsBorder::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 	if (next_x_pos - ball->Radius < CsConfig::Border_X_Offset)
 	{
 		got_hit = true;
-		ball->Ball_Direction = M_PI - ball->Ball_Direction;
+		ball->Reflect(false);
 	}
 	if (next_y_pos - ball->Radius < CsConfig::Border_Y_Offset)
 	{
 		got_hit = true;
-		ball->Ball_Direction = -ball->Ball_Direction;
+		ball->Reflect(true);
 	}
 	if (next_x_pos + ball->Radius > CsConfig::Max_X_Pos)
 	{
 		got_hit = true;
-		ball->Ball_Direction = M_PI - ball->Ball_Direction;
+		ball->Reflect(false);
 	}
 	if (next_y_pos + ball->Radius > CsConfig::Max_Y_Pos)
 	{
 		if (CsConfig::Level_Has_Floor)
 		{
 			got_hit = true;
-			ball->Ball_Direction = -ball->Ball_Direction;
+			ball->Reflect(true);
 		}
 		else
 		{
