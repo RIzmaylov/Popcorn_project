@@ -20,6 +20,20 @@ CsPlatform::CsPlatform() :
 	X_Pos = (CsConfig::Max_X_Pos - Width) / 2;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CsPlatform::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
+{
+	if (next_y_pos + ball->Radius > CsConfig::Platform_Y_Pos)
+	{
+		if (next_x_pos + ball->Radius >= X_Pos && next_x_pos - ball->Radius <= X_Pos + Width)
+		{
+			ball->Ball_Direction = M_PI + (M_PI - ball->Ball_Direction);
+			return true;
+		}
+	}
+	return false;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 void CsPlatform::Init()
 {
 	Hightlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));

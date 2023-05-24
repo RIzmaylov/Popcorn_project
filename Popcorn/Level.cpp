@@ -21,7 +21,6 @@ char CLevel::Level_01[CsConfig::Level_Height][CsConfig::Level_Width] = {								
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CLevel::CLevel() :
-	Has_Floor(false),
 	Active_Brick(EBrick_Type::Red),
 	Brick_Red_pen(0),
 	Brick_Blue_pen(0),
@@ -30,6 +29,29 @@ CLevel::CLevel() :
 	Brick_Blue_brush(0),
 	Level_Rect{}
 {}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CLevel::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
+{// Корректировки движения при отражении от кирпича
+
+	int brick_y_pos = CsConfig::Level_Y_Offset + CsConfig::Level_Height * CsConfig::Cell_Height;
+
+	for (int i = CsConfig::Level_Height - 1; i >= 0; --i)
+	{
+		for (int j = 0; j < CsConfig::Level_Width; ++j)
+		{
+			if (Level_01[i][j] == 0)
+				continue;
+			if (next_y_pos < brick_y_pos)
+			{
+				ball->Ball_Direction = -ball->Ball_Direction;
+				return true;
+			}
+
+		}
+		brick_y_pos -= CsConfig::Cell_Height;
+	}
+	return false;
+}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CLevel::Init()
 {
@@ -44,29 +66,6 @@ void CLevel::Init()
 	Level_Rect.top = CsConfig::Level_Y_Offset * CsConfig::Global_Scale;
 	Level_Rect.right = Level_Rect.left + CsConfig::Cell_Width * CsConfig::Level_Width * CsConfig::Global_Scale;
 	Level_Rect.bottom = Level_Rect.top + CsConfig::Cell_Height * CsConfig::Level_Height * CsConfig::Global_Scale;
-}
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-void CLevel::Check_Level_Brick_Hit(double& next_y_pos, double& ball_direction)
-{// Корректировки движения при отражении от кирпича
-
-	int brick_y_pos = CsConfig::Level_Y_Offset + CsConfig::Level_Height * CsConfig::Cell_Height;
-
-	for (int i = CsConfig::Level_Height - 1; i >= 0; --i)
-	{
-		for (int j = 0; j < CsConfig::Level_Width; ++j)
-		{
-			if (Level_01[i][j] == 0)
-				continue;
-			if (next_y_pos < brick_y_pos)
-			{
-				next_y_pos = brick_y_pos - (next_y_pos - brick_y_pos);						// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
-				ball_direction = -ball_direction;
-			}
-
-		}
-		brick_y_pos -= CsConfig::Cell_Height;
-	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CLevel::Draw(HDC hdc, RECT& paint_area)

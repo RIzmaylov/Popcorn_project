@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Config.h"
+#include "Ball.h"
 
 enum class EPlatform_State
 {
@@ -12,10 +12,13 @@ enum class EPlatform_State
 	Expand_Roll_In
 };
 
-class CsPlatform
+class CsPlatform : public CHit_Checker
 {
 public:
 	CsPlatform();
+
+	bool Check_Hit(double next_x_pos, double next_y_pos, CBall* ball);
+
 	void Init();
 	void Act();
 	EPlatform_State Get_State();

@@ -3,7 +3,7 @@
 #include <Windows.h>
 
 #include "Border.h"
-#include "Ball.h"
+#include "Level.h"
 #include "Platform.h"
 
 const int Timer_Id = WM_USER + 1;								// ID процесса юзера

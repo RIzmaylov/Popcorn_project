@@ -38,6 +38,40 @@ void CsBorder::Draw(HDC hdc,  RECT& paint_area)
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CsBorder::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
+{
+	bool got_hit = false;
+	if (next_x_pos - ball->Radius < CsConfig::Border_X_Offset)
+	{
+		got_hit = true;
+		ball->Ball_Direction = M_PI - ball->Ball_Direction;
+	}
+	if (next_y_pos - ball->Radius < CsConfig::Border_Y_Offset)
+	{
+		got_hit = true;
+		ball->Ball_Direction = -ball->Ball_Direction;
+	}
+	if (next_x_pos + ball->Radius > CsConfig::Max_X_Pos)
+	{
+		got_hit = true;
+		ball->Ball_Direction = M_PI - ball->Ball_Direction;
+	}
+	if (next_y_pos + ball->Radius > CsConfig::Max_Y_Pos)
+	{
+		if (CsConfig::Level_Has_Floor)
+		{
+			got_hit = true;
+			ball->Ball_Direction = -ball->Ball_Direction;
+		}
+		else
+		{
+			if (next_y_pos + ball->Radius > CsConfig::Max_Y_Pos + ball->Radius * 4.0)											// Проверка нижней границы с учетом размера шарика
+				ball->Set_State(EBall_State::Lost, next_x_pos);
+		}
+	}
+	return got_hit;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsBorder::Draw_Element(HDC hdc, int x, int y, bool is_top_border) 
 {	//Отрисовка одного тайла рамки игрового поля
 

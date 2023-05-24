@@ -19,6 +19,10 @@ void CsEngine::Init_Engine(HWND hwnd)
 	Ball.Init();
 	Border.Init();
 
+	CBall::Add_Hit_Checker(&Border);
+	CBall::Add_Hit_Checker(&Level);
+	CBall::Add_Hit_Checker(&Platform);
+
 	Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
 	// инициализация выкатывания платформы
 	Platform.Set_State(EPlatform_State::Normal);
@@ -87,7 +91,7 @@ int CsEngine::On_Timer()
 	switch (Game_State)
 	{
 	case EGame_States::Play_Level:
-		Ball.Move(&Level, Platform.X_Pos, Platform.Width);
+		Ball.Move();
 
 		if (Ball.Get_State() == EBall_State::Lost)
 		{

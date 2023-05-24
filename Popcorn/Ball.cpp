@@ -1,14 +1,18 @@
 ﻿#include "Ball.h"
 
 const double CBall::Start_Ball_Y_Pos = 181.0;
+const double CBall::Radius = 2.0;
+int CBall::Hit_Checkers_Count = 0;
+CHit_Checker* CBall::Hit_Checkers[] = {};
 
 CBall::CBall():
 	Ball_State(EBall_State::Normal),
 	Ball_Pen(0),
 	Ball_Brush(0),
-	Ball_X_Pos(0.0),														// положение шарика по оси Х
-	Ball_Y_Pos(Start_Ball_Y_Pos),								// положение шарика по оси У
+	Center_X_Pos(0.0),													// положение центра шарика по оси Х
+	Center_Y_Pos(Start_Ball_Y_Pos),							// положение центра шарика по оси У
 	Ball_Speed(0.0),														// скорость смещения шарика
+	Rest_Distance(0.0),
 	Ball_Direction(0),													// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
 	Ball_Rect{},
 	Prev_Ball_Rect{}
@@ -44,67 +48,47 @@ void CBall::Draw(HDC hdc, RECT& paint_area)
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CBall::Move(CLevel* level, int platform_x_pos, int platform_width)
+void CBall::Move()
 {
+	bool got_hit;
 	double next_x_pos, next_y_pos;
-	int max_x_pos = CsConfig::Max_X_Pos - CsConfig::Ball_Size;
 	int platform_y_pos = CsConfig::Platform_Y_Pos - CsConfig::Ball_Size;
-	int max_y_pos = CsConfig::Max_Y_Pos - CsConfig::Ball_Size;
+	double step_size = 1.0 / CsConfig::Global_Scale;
 
 	if (Ball_State != EBall_State::Normal)
 		return;
 
 	Prev_Ball_Rect = Ball_Rect;
 
-	next_x_pos = Ball_X_Pos + (Ball_Speed * cos(Ball_Direction));
-	next_y_pos = Ball_Y_Pos - (Ball_Speed * sin(Ball_Direction));
+	Rest_Distance += Ball_Speed;
 
-	// Корректировки движения при отражении от рамки
-	if (next_x_pos < CsConfig::Border_X_Offset)
+
+	while (Rest_Distance >= step_size)
 	{
-		next_x_pos = CsConfig::Level_X_Offset - (next_x_pos - CsConfig::Level_X_Offset);
-		Ball_Direction = M_PI - Ball_Direction;
-	}
-	if (next_y_pos < CsConfig::Border_Y_Offset)
-	{
-		next_y_pos = CsConfig::Border_Y_Offset - (next_y_pos - CsConfig::Border_Y_Offset);	// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
-		Ball_Direction = - Ball_Direction;
-	}
-	if (next_x_pos > max_x_pos)
-	{
-		next_x_pos = max_x_pos - (next_x_pos - max_x_pos);																	// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
-		Ball_Direction = M_PI - Ball_Direction;
-	}
-	if (next_y_pos > max_y_pos)
-	{
-		if (level->Has_Floor)
+		got_hit = false;
+		next_x_pos = Center_X_Pos + (step_size * cos(Ball_Direction));
+		next_y_pos = Center_Y_Pos - (step_size * sin(Ball_Direction));
+
+		for (int i = 0; i < Hit_Checkers_Count; ++i)
+			got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);									// |= - накопление булевых значений с помощью операции ИЛИ
+
+		//// Корректировки движения при отражении от рамки
+		//got_hit |= border_hit_checker->Check_Hit(next_x_pos, next_y_pos, this);									// |= - накопление булевых значений с помощью операции ИЛИ
+		//// Корректировки движения при отражении от кирпича
+		//got_hit |= level_hit_checker->Check_Hit(next_x_pos, next_y_pos, this);
+		//// Корректировки движения при отражении от платформы
+		//got_hit |= platform_hit_checker->Check_Hit(next_x_pos, next_y_pos, this);
+
+
+		if (!got_hit)
 		{
-			next_y_pos = max_y_pos - (next_y_pos - max_y_pos);																	// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
-			Ball_Direction = -Ball_Direction;
-		}
-		else
-		{
-			if (next_y_pos > max_y_pos + CsConfig::Ball_Size)																		// Проверка нижней границы с учетом размера шарика
-				Ball_State = EBall_State::Lost;
+			// Шарик продолит смещение, если не взаимодействует с другими объектами
+			Rest_Distance -= step_size;
+
+			Center_X_Pos = next_x_pos;
+			Center_Y_Pos = next_y_pos;
 		}
 	}
-
-	// Корректировки движения при отражении от платформы
-	if (next_y_pos > platform_y_pos)
-	{
-		if (next_x_pos >= platform_x_pos && next_x_pos <= platform_x_pos + platform_width)
-		{
-			next_y_pos = platform_y_pos - (next_y_pos - platform_y_pos);											// преобразование движения шарика с учетом, если преграда раньше, чем следующее положение
-			Ball_Direction = M_PI + (M_PI - Ball_Direction);
-		}
-	}
-
-	// Корректировки движения при отражении от кирпича
-	level->Check_Level_Brick_Hit(next_y_pos, Ball_Direction);
-
-	// Смещение шарика
-	Ball_X_Pos = next_x_pos;
-	Ball_Y_Pos = next_y_pos;
 
 	Redraw_Ball();
 }
@@ -114,23 +98,25 @@ EBall_State CBall::Get_State()
 	return Ball_State;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CBall::Set_State(EBall_State new_state, int x_pos)
+void CBall::Set_State(EBall_State new_state, double x_pos)
 {
 	switch (new_state)
 	{
 	case EBall_State::Normal:
-		Ball_X_Pos = x_pos - CsConfig::Ball_Size / 2.0;
-		Ball_Y_Pos = Start_Ball_Y_Pos;
+		Center_X_Pos = x_pos;
+		Center_Y_Pos = Start_Ball_Y_Pos;
 		Ball_Speed = 3.0;
+		Rest_Distance = 0.0;
 		Ball_Direction = M_PI - M_PI_4;
 		Redraw_Ball();
 		break;
 
 
 	case EBall_State::On_Platform:
-		Ball_X_Pos = x_pos - CsConfig::Ball_Size / 2.0;
-		Ball_Y_Pos = Start_Ball_Y_Pos;
+		Center_X_Pos = x_pos;
+		Center_Y_Pos = Start_Ball_Y_Pos;
 		Ball_Speed = 0.0;
+		Rest_Distance = 0.0;
 		Ball_Direction = M_PI - M_PI_4;
 		Redraw_Ball();
 		break;
@@ -141,15 +127,23 @@ void CBall::Set_State(EBall_State new_state, int x_pos)
 		break;
 	}
 
-	Ball_State = EBall_State::Normal;
+	Ball_State = new_state;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CBall::Add_Hit_Checker(CHit_Checker* hit_checker)
+{
+	if (Hit_Checkers_Count >= sizeof(Hit_Checkers) / sizeof(Hit_Checkers[0]))
+		return;
+
+	Hit_Checkers[Hit_Checkers_Count++] = hit_checker;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CBall::Redraw_Ball()
 {
-	Ball_Rect.left = static_cast<int>(Ball_X_Pos * CsConfig::Global_Scale);
-	Ball_Rect.top = static_cast<int>(Ball_Y_Pos * CsConfig::Global_Scale);
-	Ball_Rect.right = Ball_Rect.left + CsConfig::Ball_Size * CsConfig::Global_Scale;
-	Ball_Rect.bottom = Ball_Rect.top + CsConfig::Ball_Size * CsConfig::Global_Scale;
+	Ball_Rect.left = static_cast<int>((Center_X_Pos - Radius) * CsConfig::Global_Scale);
+	Ball_Rect.top = static_cast<int>((Center_Y_Pos - Radius) * CsConfig::Global_Scale);
+	Ball_Rect.right = static_cast<int>((Center_X_Pos + Radius) * CsConfig::Global_Scale);
+	Ball_Rect.bottom = static_cast<int>((Center_Y_Pos + Radius) * CsConfig::Global_Scale);
 
 	InvalidateRect(CsConfig::Hwnd, &Prev_Ball_Rect, FALSE);
 	InvalidateRect(CsConfig::Hwnd, &Ball_Rect, FALSE);
