@@ -1,5 +1,26 @@
 ﻿#include "Ball.h"
 
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CHit_Checker::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double& x)
+{// функция проверяет пересечение горизонтального отрезка (проходящего от left_x до right_x через y) с окружностью радиусом radius
+ // x * x + y * y = R * R - формула окружности для определения пересечения мячика с кирпичем
+	double min_x, max_x;
+
+	if (y > radius)
+		return false;
+
+	x = sqrt(radius * radius - y * y);
+
+	min_x = next_x_pos - x;
+	max_x = next_x_pos + x;
+
+	if (max_x >= left_x && max_x <= right_x || min_x >= left_x && min_x <= right_x)
+		return true;
+	else
+		return false;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 const double CBall::Start_Ball_Y_Pos = 181.0;
 const double CBall::Radius = 2.0;
 int CBall::Hit_Checkers_Count = 0;
@@ -19,7 +40,7 @@ CBall::CBall():
 	Ball_Rect{},
 	Prev_Ball_Rect{}
 {
-	//Set_State(EBall_State::Normal, 0);
+	Set_State(EBall_State::Normal, 0);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CBall::Init()
@@ -74,6 +95,7 @@ void CBall::Move()
 		next_x_pos = Center_X_Pos + (step_size * cos(Ball_Direction));
 		next_y_pos = Center_Y_Pos - (step_size * sin(Ball_Direction));
 
+		// корректировка позиции при отражении:
 		for (int i = 0; i < Hit_Checkers_Count; ++i)
 			got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);									// |= - накопление булевых значений с помощью операции ИЛИ
 
@@ -179,6 +201,22 @@ void CBall::Reflect(bool from_horizontal)
 		Set_Direction(-Ball_Direction);
 	else
 		Set_Direction(M_PI - Ball_Direction);
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CBall::Is_Moving_Up()
+{
+	if (Ball_Direction >= 0.0 && Ball_Direction < M_PI)
+		return true;
+	else
+		return false;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CBall::Is_Moving_Left()
+{
+	if (Ball_Direction > M_PI_2 && Ball_Direction < M_PI + M_PI_2)
+		return true;
+	else
+		return false;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CBall::Add_Hit_Checker(CHit_Checker* hit_checker)

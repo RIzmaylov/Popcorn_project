@@ -57,7 +57,7 @@ bool CLevel::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 	bool got_horizontal_hit, got_vertical_hit;
 	double horizontal_reflection_pos, vertical_reflection_pos;
 
-	if (next_y_pos > CsConfig::Level_Y_Offset + (CsConfig::Level_Height - 1) * CsConfig::Cell_Height + CsConfig::Brick_Height)
+	if (next_y_pos + ball->Radius > CsConfig::Level_Y_Offset + (CsConfig::Level_Height - 1) * CsConfig::Cell_Height + CsConfig::Brick_Height)
 		return false;
 
 	direction = ball->Get_Direction();
@@ -169,61 +169,26 @@ void CLevel::Draw(HDC hdc, RECT& paint_area)
 	//Active_Brick.Draw(hdc, paint_area);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-//bool CLevel::Is_Check_Horizontal_First(double next_x_pos, double next_y_pos)
-//{
-//	double min_distance_to_horizontal, another_min_distance, min_distance_to_vertical;
-//
-//	// Нахождение минимальных расстояний от центра шарика до горизонтальных и вертикальных граней кирпича
-//	min_distance_to_horizontal = fabs(next_x_pos - Current_Brick_Left_X);
-//	another_min_distance = fabs(next_x_pos - Current_Brick_Right_X);
-//
-//	if (another_min_distance < min_distance_to_horizontal)
-//		min_distance_to_horizontal = another_min_distance;
-//
-//	min_distance_to_vertical = fabs(next_y_pos - Current_Brick_Top_Y);
-//	another_min_distance = fabs(next_y_pos - Current_Brick_Low_Y);
-//
-//	if (another_min_distance < min_distance_to_vertical)
-//		min_distance_to_vertical = another_min_distance;
-//
-//	// Если расстояние до горизонтальной грани меньше, то считаем сначала рефлект от горизонтальной, если до вертикальной - до вертикальной
-//	if (min_distance_to_horizontal <= min_distance_to_vertical)
-//		return true;
-//	else
-//		return false;
-//}
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool CLevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, int level_x, int level_y, CBall* ball, double& reflection_pos)
 {
 	double direction = ball->Get_Direction();
 
-	// Проверка попадания в нижнюю грань кирпича
-	if (direction >= 0.0 && direction < M_PI)
-	{
+	if (ball->Is_Moving_Up())
+	{// Проверка попадания в нижнюю грань кирпича
 		if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Low_Y, next_x_pos, Current_Brick_Left_X, Current_Brick_Right_X, ball->Radius, reflection_pos))
-		{
-
-			// Проверка возможности отскока вниз
+		{// Проверка возможности отскока вниз
 			if (level_y < CsConfig::Level_Height - 1 && Current_Level[level_y + 1][level_x] == 0)
-			{
-				//ball->Reflect(true);
 				return true;
-			}
 			else
 				return false;
 		}
 	}
-	// Проверка попадания в верхнюю грань кирпича
-	if (direction >= M_PI && direction <= 2.0 * M_PI)
-	{
+	else
+	{	// Проверка попадания в верхнюю грань кирпича
 		if (Hit_Circle_On_Line(next_y_pos - Current_Brick_Top_Y, next_x_pos, Current_Brick_Left_X, Current_Brick_Right_X, ball->Radius, reflection_pos))
-		{
-			// Проверка возможности отскока вверх
+		{// Проверка возможности отскока вверх
 			if (level_y > 0 && Current_Level[level_y - 1][level_x] == 0)
-			{
-				//ball->Reflect(true);
 				return true;
-			}
 			else
 				return false;
 		}
@@ -235,56 +200,27 @@ bool CLevel::Check_Horizontal_Hit(double next_x_pos, double next_y_pos, int leve
 {
 	double direction = ball->Get_Direction();
 
-	// Проверка попадания в левую грань кирпича
-	if (direction >= 0.0 && direction <= M_PI_2 || direction >= M_PI + M_PI_2 && direction <= 2.0 * M_PI)
-	{
+	if (! ball->Is_Moving_Left())
+	{// Проверка попадания в левую грань кирпича
 		if (Hit_Circle_On_Line(Current_Brick_Left_X - next_x_pos, next_y_pos, Current_Brick_Top_Y, Current_Brick_Low_Y, ball->Radius, reflection_pos))
-		{
-			// Проверка возможности отскока влево
+		{// Проверка возможности отскока влево
 			if (level_x > 0 && Current_Level[level_y][level_x - 1] == 0)
-			{
-				//ball->Reflect(false);
 				return true;
-			}
 			else
 				return false;
 		}
 	}
-	// Проверка попадания в правую грань кирпича
-	if (direction > M_PI_2 && direction < M_PI + M_PI_2)
-	{
+	else
+	{// Проверка попадания в правую грань кирпича
 		if (Hit_Circle_On_Line(Current_Brick_Right_X - next_x_pos, next_y_pos, Current_Brick_Top_Y, Current_Brick_Low_Y, ball->Radius, reflection_pos))
-		{
-			// Проверка возможности отскока вправо
+		{// Проверка возможности отскока вправо
 			if (level_x < CsConfig::Level_Width && Current_Level[level_y][level_x + 1] == 0)
-			{
-				//ball->Reflect(false);
 				return true;
-			}
 			else
 				return false;
 		}
 	}
 	return false;
-}
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------
-bool CLevel::Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double& x)
-{// функция проверяет пересечение горизонтального отрезка (проходящего от left_x до right_x через y) с окружностью радиусом radius
-	// x * x + y * y = R * R - формула окружности для определения пересечения мячика с кирпичем
-	double min_x, max_x;
-
-	if (y > radius)
-		return false;
-
-	x = sqrt(radius * radius - y * y);
-
-	min_x = next_x_pos - x;
-	max_x = next_x_pos + x;
-
-	if (max_x >= left_x && max_x <= right_x || min_x >= left_x && min_x <= right_x)
-		return true;
-	else
-		return false;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CLevel::Draw_Brick(HDC hdc, int x, int y, EBrick_Type brick_type)

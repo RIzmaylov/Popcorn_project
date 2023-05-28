@@ -15,6 +15,7 @@ class CHit_Checker
 {
 public:
 	virtual bool Check_Hit(double next_x_pos, double next_y_pos, CBall* ball) = 0;
+	bool Hit_Circle_On_Line(double y, double next_x_pos, double left_x, double right_x, double radius, double& x);
 };
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 class CBall
@@ -32,6 +33,8 @@ public:
 	double Get_Direction();
 	void Set_Direction(double new_direction);
 	void Reflect(bool from_horizontal);
+	bool Is_Moving_Up();
+	bool Is_Moving_Left();
 
 	static void Add_Hit_Checker(CHit_Checker* hit_checker);
 

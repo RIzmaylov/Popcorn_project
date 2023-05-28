@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CsEngine::CsEngine() :
-	Game_State(EGame_States::Test_Ball)
+	Game_State(EGame_States::Play_Level)
 {}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsEngine::Init_Engine(HWND hwnd)
@@ -23,9 +23,9 @@ void CsEngine::Init_Engine(HWND hwnd)
 	CBall::Add_Hit_Checker(&Level);
 	CBall::Add_Hit_Checker(&Platform);
 
-	Level.Set_Current_Level(CLevel::Test_Level);
+	Level.Set_Current_Level(CLevel::Level_01);
 
-	//Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
+	Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
 	// инициализация выкатывания платформы
 	Platform.Set_State(EPlatform_State::Normal);
 	// очищение области платформы при первом запуске (чтобы не оставался след при первом перемещении платформы)
@@ -40,11 +40,11 @@ void CsEngine::Draw_Frame(HDC hdc, RECT& paint_area)
 
 	Level.Draw(hdc, paint_area);
 
-	Ball.Draw(hdc, paint_area);
-
 	Border.Draw(hdc, paint_area);
 
 	Platform.Draw(hdc, paint_area);
+
+	Ball.Draw(hdc, paint_area);
 
 	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
 	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);

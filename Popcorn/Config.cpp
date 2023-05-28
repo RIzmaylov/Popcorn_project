@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CColor::CColor(unsigned char r, unsigned char g, unsigned char b) : R(r), G(g), B(b) {}
 
-bool CsConfig::Level_Has_Floor = false;
+bool CsConfig::Level_Has_Floor = true;
 int CsConfig::Current_Timer_Tick = 0;
 const CColor CsConfig::BG_Color(15, 63, 31);
 const CColor CsConfig::Red_Brick_Color(255,85,85);
