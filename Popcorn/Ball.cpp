@@ -14,10 +14,12 @@ CBall::CBall():
 	Ball_Speed(0.0),														// скорость смещения шарика
 	Rest_Distance(0.0),
 	Ball_Direction(0),													// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
+	Testing_Is_Active(false),
+	Test_Iteration(0),
 	Ball_Rect{},
 	Prev_Ball_Rect{}
 {
-	Set_State(EBall_State::Normal, 0);
+	//Set_State(EBall_State::Normal, 0);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CBall::Init()
@@ -38,6 +40,10 @@ void CBall::Draw(HDC hdc, RECT& paint_area)
 
 		Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
 	}
+
+	if (Ball_State == EBall_State::Lost)
+		return;
+
 	if (IntersectRect(&intersection_rect, &paint_area, &Ball_Rect))					// определение пересечения области рисования и перерисовки кадра
 	{
 		// 2. Рисуем шарик
@@ -71,14 +77,6 @@ void CBall::Move()
 		for (int i = 0; i < Hit_Checkers_Count; ++i)
 			got_hit |= Hit_Checkers[i]->Check_Hit(next_x_pos, next_y_pos, this);									// |= - накопление булевых значений с помощью операции ИЛИ
 
-		//// Корректировки движения при отражении от рамки
-		//got_hit |= border_hit_checker->Check_Hit(next_x_pos, next_y_pos, this);									// |= - накопление булевых значений с помощью операции ИЛИ
-		//// Корректировки движения при отражении от кирпича
-		//got_hit |= level_hit_checker->Check_Hit(next_x_pos, next_y_pos, this);
-		//// Корректировки движения при отражении от платформы
-		//got_hit |= platform_hit_checker->Check_Hit(next_x_pos, next_y_pos, this);
-
-
 		if (!got_hit)
 		{
 			// Шарик продолит смещение, если не взаимодействует с другими объектами
@@ -86,10 +84,38 @@ void CBall::Move()
 
 			Center_X_Pos = next_x_pos;
 			Center_Y_Pos = next_y_pos;
+
+			if (Testing_Is_Active)
+				Rest_Test_Distance -= step_size;
 		}
 	}
 
 	Redraw_Ball();
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CBall::Set_For_Test()
+{
+	Testing_Is_Active = true;
+	Rest_Test_Distance = 40.0;
+
+	Set_State(EBall_State::Normal, 100 + Test_Iteration, 100);
+	Ball_Direction = M_PI - M_PI_4;
+
+	++Test_Iteration;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CBall::Is_Test_Finished()
+{
+	if (Testing_Is_Active)
+	{
+		if (Rest_Test_Distance <= 0.0)
+		{
+			Testing_Is_Active = false;
+			Set_State(EBall_State::Lost, 0);
+			return true;
+		}
+	}
+	return false;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 EBall_State CBall::Get_State()
@@ -97,13 +123,13 @@ EBall_State CBall::Get_State()
 	return Ball_State;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-void CBall::Set_State(EBall_State new_state, double x_pos)
+void CBall::Set_State(EBall_State new_state, double x_pos, double y_pos)
 {
 	switch (new_state)
 	{
 	case EBall_State::Normal:
 		Center_X_Pos = x_pos;
-		Center_Y_Pos = Start_Ball_Y_Pos;
+		Center_Y_Pos = y_pos;
 		Ball_Speed = 3.0;
 		Rest_Distance = 0.0;
 		Ball_Direction = M_PI_4;
@@ -113,7 +139,7 @@ void CBall::Set_State(EBall_State new_state, double x_pos)
 
 	case EBall_State::On_Platform:
 		Center_X_Pos = x_pos;
-		Center_Y_Pos = Start_Ball_Y_Pos;
+		Center_Y_Pos = y_pos;
 		Ball_Speed = 0.0;
 		Rest_Distance = 0.0;
 		Ball_Direction = M_PI_4;

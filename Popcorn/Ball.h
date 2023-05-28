@@ -25,8 +25,10 @@ public:
 
 	void Draw(HDC hdc, RECT& paint_area);
 	void Move();
+	void Set_For_Test();
 	EBall_State Get_State();
-	void Set_State(EBall_State new_state, double x_pos);
+	void Set_State(EBall_State new_state, double x_pos, double y_pos = Start_Ball_Y_Pos);
+	bool Is_Test_Finished();
 	double Get_Direction();
 	void Set_Direction(double new_direction);
 	void Reflect(bool from_horizontal);
@@ -47,6 +49,10 @@ private:
 	double Ball_Speed;																														// скорость смещения шарика
 	double Rest_Distance;																													// оставшееся расстояние шарика, необходима для правильного обсчета перемещения
 	double Ball_Direction;																												// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
+
+	bool Testing_Is_Active;																												// флаг активного тестового режима
+	int Test_Iteration;																														// итерации в тестовом уровне
+	double Rest_Test_Distance;																										// остаточная дистанция шарика в тестовом режиме
 
 	RECT Ball_Rect, Prev_Ball_Rect;
 

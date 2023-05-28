@@ -2,7 +2,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 CsEngine::CsEngine() :
-	Game_State(EGame_States::Play_Level)
+	Game_State(EGame_States::Test_Ball)
 {}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsEngine::Init_Engine(HWND hwnd)
@@ -23,7 +23,9 @@ void CsEngine::Init_Engine(HWND hwnd)
 	CBall::Add_Hit_Checker(&Level);
 	CBall::Add_Hit_Checker(&Platform);
 
-	Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
+	Level.Set_Current_Level(CLevel::Test_Level);
+
+	//Ball.Set_State(EBall_State::Normal, Platform.X_Pos + Platform.Width / 2);
 	// инициализация выкатывания платформы
 	Platform.Set_State(EPlatform_State::Normal);
 	// очищение области платформы при первом запуске (чтобы не оставался след при первом перемещении платформы)
@@ -90,6 +92,12 @@ int CsEngine::On_Timer()
 
 	switch (Game_State)
 	{
+	case EGame_States::Test_Ball:
+		Ball.Set_For_Test();
+		Game_State = EGame_States::Play_Level;
+		break;
+
+
 	case EGame_States::Play_Level:
 		Ball.Move();
 
@@ -98,6 +106,9 @@ int CsEngine::On_Timer()
 			Game_State = EGame_States::Lost_Ball;
 			Platform.Set_State(EPlatform_State::Meltdown);
 		}
+
+		if (Ball.Is_Test_Finished())
+			Game_State = EGame_States::Test_Ball;
 		break;
 
 
