@@ -79,7 +79,6 @@ void CBall::Move()
 {
 	bool got_hit;
 	double next_x_pos, next_y_pos;
-	double step_size = 1.0 / CsConfig::Global_Scale;
 
 	if (Ball_State != EBall_State::Normal)
 		return;
@@ -89,11 +88,11 @@ void CBall::Move()
 	Rest_Distance += Ball_Speed;
 
 
-	while (Rest_Distance >= step_size)
+	while (Rest_Distance >= CsConfig::Moving_Step_Size)
 	{
 		got_hit = false;
-		next_x_pos = Center_X_Pos + (step_size * cos(Ball_Direction));
-		next_y_pos = Center_Y_Pos - (step_size * sin(Ball_Direction));
+		next_x_pos = Center_X_Pos + (CsConfig::Moving_Step_Size * cos(Ball_Direction));
+		next_y_pos = Center_Y_Pos - (CsConfig::Moving_Step_Size * sin(Ball_Direction));
 
 		// корректировка позиции при отражении:
 		for (int i = 0; i < Hit_Checkers_Count; ++i)
@@ -102,13 +101,13 @@ void CBall::Move()
 		if (!got_hit)
 		{
 			// Шарик продолит смещение, если не взаимодействует с другими объектами
-			Rest_Distance -= step_size;
+			Rest_Distance -= CsConfig::Moving_Step_Size;
 
 			Center_X_Pos = next_x_pos;
 			Center_Y_Pos = next_y_pos;
 
 			if (Testing_Is_Active)
-				Rest_Test_Distance -= step_size;
+				Rest_Test_Distance -= CsConfig::Moving_Step_Size;
 		}
 	}
 

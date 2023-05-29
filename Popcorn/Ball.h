@@ -39,6 +39,7 @@ public:
 	static void Add_Hit_Checker(CHit_Checker* hit_checker);
 
 	static const double Radius;
+	double Ball_Speed;																														// скорость смещения шарика
 
 private:
 	void Redraw_Ball();
@@ -49,7 +50,6 @@ private:
 	HBRUSH Ball_Brush;
 	double Center_X_Pos;																													// положение центра шарика по оси Х
 	double Center_Y_Pos;																													// положение центра шарика по оси У
-	double Ball_Speed;																														// скорость смещения шарика
 	double Rest_Distance;																													// оставшееся расстояние шарика, необходима для правильного обсчета перемещения
 	double Ball_Direction;																												// направление смещения шарика(M_PI_4 - число ПИ / 4 т.е. 45 градусов)
 

@@ -14,6 +14,7 @@ HPEN CsConfig::BG_Pen;
 HBRUSH CsConfig::BG_Brush;
 HWND CsConfig::Hwnd;
 
+const double CsConfig::Moving_Step_Size = 1.0 / CsConfig::Global_Scale;
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsConfig::Setup_Colors()
 {

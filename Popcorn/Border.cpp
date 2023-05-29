@@ -51,7 +51,8 @@ bool CsBorder::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 		got_hit = true;
 		ball->Reflect(true);
 	}
-	if (next_x_pos + ball->Radius > CsConfig::Max_X_Pos)
+
+	if (next_x_pos + ball->Radius > CsConfig::Max_X_Pos + 1)
 	{
 		got_hit = true;
 		ball->Reflect(false);

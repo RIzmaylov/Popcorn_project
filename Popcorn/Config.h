@@ -33,6 +33,8 @@ public:
 	static HBRUSH BG_Brush;
 	static HWND Hwnd;
 
+	static const double Moving_Step_Size;
+
 	static const int Global_Scale = 4;																																// глобальный масштаб всех элементов игры
 	static const int FPS = 20;																																				// FPS для таймера
 
