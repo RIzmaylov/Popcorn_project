@@ -14,12 +14,19 @@ HPEN CsConfig::BG_Pen;
 HBRUSH CsConfig::BG_Brush;
 HWND CsConfig::Hwnd;
 
+HPEN CsConfig::Brick_Red_pen, CsConfig::Brick_Blue_pen,CsConfig::Letter_Pen;
+HBRUSH CsConfig::Brick_Red_brush, CsConfig::Brick_Blue_brush;
+
 const double CsConfig::Moving_Step_Size = 1.0 / CsConfig::Global_Scale;
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsConfig::Setup_Colors()
 {
+	CsConfig::Letter_Pen = CreatePen(PS_SOLID, CsConfig::Global_Scale, RGB(255, 255, 255));
+
 	// создание кистей и карандашей
 	CsConfig::Create_Pen_Brush(CsConfig::BG_Color, BG_Pen, BG_Brush);
+	CsConfig::Create_Pen_Brush(CsConfig::Red_Brick_Color, CsConfig::Brick_Red_pen, CsConfig::Brick_Red_brush);
+	CsConfig::Create_Pen_Brush(CsConfig::Blue_Brick_Color, CsConfig::Brick_Blue_pen, CsConfig::Brick_Blue_brush);
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------

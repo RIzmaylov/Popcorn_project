@@ -81,18 +81,18 @@ void CsBorder::Draw_Element(HDC hdc, int x, int y, bool is_top_border)
 	SelectObject(hdc, Border_Blue_Brush);
 
 	if (is_top_border)
-		Rectangle(hdc, x * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 4) * CsConfig::Global_Scale, (y + 4) * CsConfig::Global_Scale);
+		Rectangle(hdc, x * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 4) * CsConfig::Global_Scale - 1, (y + 4) * CsConfig::Global_Scale) - 1;
 	else
-		Rectangle(hdc, (x + 1) * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + 4) * CsConfig::Global_Scale, (y + 4) * CsConfig::Global_Scale);
+		Rectangle(hdc, (x + 1) * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + 4) * CsConfig::Global_Scale - 1, (y + 4) * CsConfig::Global_Scale) - 1;
 
 	// Выводится дополнительная линия рамки
 	SelectObject(hdc, Border_White_Pen);
 	SelectObject(hdc, Border_White_Brush);
 
 	if (is_top_border)
-		Rectangle(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + 4) * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale);
-	else 
-		Rectangle(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + 1) * CsConfig::Global_Scale, (y + 4) * CsConfig::Global_Scale);
+		Rectangle(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + 4) * CsConfig::Global_Scale - 1, (y + 1) * CsConfig::Global_Scale) - 1;
+	else 																																																		  
+		Rectangle(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + 1) * CsConfig::Global_Scale - 1, (y + 4) * CsConfig::Global_Scale) - 1;
 
 
 	// Выводится однопиксельная перфорация рамки
@@ -100,9 +100,9 @@ void CsBorder::Draw_Element(HDC hdc, int x, int y, bool is_top_border)
 	SelectObject(hdc, CsConfig::BG_Brush);
 
 	if (is_top_border)
-		Rectangle(hdc, (x + 2) * CsConfig::Global_Scale, (y + 2) * CsConfig::Global_Scale, (x + 3) * CsConfig::Global_Scale, (y + 3) * CsConfig::Global_Scale);
+		Rectangle(hdc, (x + 2) * CsConfig::Global_Scale, (y + 2) * CsConfig::Global_Scale, (x + 3) * CsConfig::Global_Scale - 1, (y + 3) * CsConfig::Global_Scale) - 1;
 	else
-		Rectangle(hdc, (x + 2) * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 3) * CsConfig::Global_Scale, (y + 2) * CsConfig::Global_Scale);
+		Rectangle(hdc, (x + 2) * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 3) * CsConfig::Global_Scale - 1, (y + 2) * CsConfig::Global_Scale) - 1;
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------

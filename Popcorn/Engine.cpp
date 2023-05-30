@@ -37,6 +37,7 @@ void CsEngine::Init_Engine(HWND hwnd)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsEngine::Draw_Frame(HDC hdc, RECT& paint_area) 
 {	// Отрисовка экрана игры
+	SetGraphicsMode(hdc, GM_ADVANCED);
 
 	Level.Draw(hdc, paint_area);
 

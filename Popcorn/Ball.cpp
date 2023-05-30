@@ -59,7 +59,7 @@ void CBall::Draw(HDC hdc, RECT& paint_area)
 		SelectObject(hdc, CsConfig::BG_Pen);
 		SelectObject(hdc, CsConfig::BG_Brush);
 
-		Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right, Prev_Ball_Rect.bottom);
+		Ellipse(hdc, Prev_Ball_Rect.left, Prev_Ball_Rect.top, Prev_Ball_Rect.right - 1, Prev_Ball_Rect.bottom - 1);
 	}
 
 	if (Ball_State == EBall_State::Lost)
@@ -71,7 +71,7 @@ void CBall::Draw(HDC hdc, RECT& paint_area)
 		SelectObject(hdc, Ball_Pen);
 		SelectObject(hdc, Ball_Brush);
 
-		Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right, Ball_Rect.bottom);
+		Ellipse(hdc, Ball_Rect.left, Ball_Rect.top, Ball_Rect.right - 1, Ball_Rect.bottom - 1);
 	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------

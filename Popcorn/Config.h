@@ -33,6 +33,9 @@ public:
 	static HBRUSH BG_Brush;
 	static HWND Hwnd;
 
+	static HPEN Brick_Red_pen, Brick_Blue_pen, Letter_Pen;
+	static HBRUSH Brick_Red_brush, Brick_Blue_brush;
+
 	static const double Moving_Step_Size;
 
 	static const int Global_Scale = 4;																																// глобальный масштаб всех элементов игры
@@ -53,5 +56,6 @@ public:
 	static const int Max_Y_Pos = 199;																																	// максимальный У уровня
 	static const int Platform_Y_Pos = 185;																														// положение платформы по оси y
 	static const int Max_Active_Bricks_Count = 10;																										
-
+	static const int Hits_Per_Letter = 1;																															// Вероятность выбить букву = 1.0 / Hits_Per_Letter
+	static const int Max_Falling_Letters_Count = 10;
 };

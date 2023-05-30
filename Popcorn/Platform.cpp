@@ -169,7 +169,7 @@ void CsPlatform::Draw_Circle_Highlight(HDC hdc, int x, int y)
 {	// Отрисовка блика шарика платформы
 	SelectObject(hdc, Hightlight_Pen);
 
-	Arc(hdc, x + CsConfig::Global_Scale, y + CsConfig::Global_Scale, x + (Circle_Size - 1) * CsConfig::Global_Scale, y + (Circle_Size - 1) * CsConfig::Global_Scale, 
+	Arc(hdc, x + CsConfig::Global_Scale, y + CsConfig::Global_Scale, x + (Circle_Size - 1) * CsConfig::Global_Scale - 1, y + (Circle_Size - 1) * CsConfig::Global_Scale - 1, 
 		x + (1 + 1) * CsConfig::Global_Scale, y + CsConfig::Global_Scale, x + CsConfig::Global_Scale, y + (1 + 3) * CsConfig::Global_Scale);
 	//Arc(hdc, x + CsConfig::Global_Scale + 1, y + CsConfig::Global_Scale + 1, x + (Circle_Size - 1) * CsConfig::Global_Scale, y + (Circle_Size - 1) * CsConfig::Global_Scale, 
 	//	x + (1 + 1) * CsConfig::Global_Scale, y + CsConfig::Global_Scale, x + CsConfig::Global_Scale, y + (1 + 3) * CsConfig::Global_Scale);
@@ -188,8 +188,8 @@ void CsPlatform::Draw_Normal_State(HDC hdc, RECT& paint_area)
 	SelectObject(hdc, Platform_Circle_pen);
 	SelectObject(hdc, Platform_Circle_brush);
 
-	Ellipse(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + Circle_Size) * CsConfig::Global_Scale, (y + Circle_Size) * CsConfig::Global_Scale);
-	Ellipse(hdc, (x + Inner_Width) * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + Inner_Width + Circle_Size) * CsConfig::Global_Scale, (y + Circle_Size) * CsConfig::Global_Scale);
+	Ellipse(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + Circle_Size) * CsConfig::Global_Scale - 1, (y + Circle_Size) * CsConfig::Global_Scale) - 1;
+	Ellipse(hdc, (x + Inner_Width) * CsConfig::Global_Scale, y * CsConfig::Global_Scale, (x + Inner_Width + Circle_Size) * CsConfig::Global_Scale - 1, (y + Circle_Size) * CsConfig::Global_Scale) - 1;
 
 	// 2. Рисуем блик на левом шарике
 	Draw_Circle_Highlight(hdc, x * CsConfig::Global_Scale, y * CsConfig::Global_Scale);
@@ -198,7 +198,7 @@ void CsPlatform::Draw_Normal_State(HDC hdc, RECT& paint_area)
 	SelectObject(hdc, Platform_Inner_pen);
 	SelectObject(hdc, Platform_Inner_brush);
 
-	RoundRect(hdc, (x + 4) * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 4 + Inner_Width - 1) * CsConfig::Global_Scale, (y + 1 + 5) * CsConfig::Global_Scale, 4 * CsConfig::Global_Scale, 4 * CsConfig::Global_Scale);
+	RoundRect(hdc, (x + 4) * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 4 + Inner_Width - 1) * CsConfig::Global_Scale, (y + 1 + 5) * CsConfig::Global_Scale - 1, 4 * CsConfig::Global_Scale, 4 * CsConfig::Global_Scale) - 1;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsPlatform::Draw_Meltdown_State(HDC hdc, RECT& paint_area)
@@ -263,8 +263,6 @@ void CsPlatform::Draw_Roll_In_State(HDC hdc, RECT& paint_area)
 	Ellipse(hdc, x, y, x + roller_size, y + roller_size);
 
 	// 2. Разделительная линия
-	SetGraphicsMode(hdc, GM_ADVANCED);
-
 	alpha = -2.0 * M_PI / static_cast<double>(Max_Rolling_Step) * static_cast<double>(Rolling_Step);
 
 	xform.eM11 = static_cast<float>(cos(alpha));
@@ -280,7 +278,7 @@ void CsPlatform::Draw_Roll_In_State(HDC hdc, RECT& paint_area)
 	SelectObject(hdc, CsConfig::BG_Pen);
 	SelectObject(hdc, CsConfig::BG_Brush);
 
-	Rectangle(hdc, -CsConfig::Global_Scale / 2, -roller_size / 2, CsConfig::Global_Scale / 2, roller_size / 2);
+	Rectangle(hdc, -CsConfig::Global_Scale / 2, -roller_size / 2, CsConfig::Global_Scale / 2 - 1, roller_size / 2) - 1;
 
 	SetWorldTransform(hdc, &old_xform);
 
