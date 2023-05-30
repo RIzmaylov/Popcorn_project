@@ -5,18 +5,28 @@
 enum class EBrick_Type
 {
 	None,
+
 	Red,
-	Blue
+	Blue,
+	Unbreakable,
+	Multihit_1,
+	Multihit_2,
+	Multihit_3,
+	Multihit_4,
+	Parachute,
+	Teleport,
+	Ad //кирпич-банер
 };
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class CActive_Brick
 {
 public:
-	CActive_Brick(EBrick_Type brick_type);
+	CActive_Brick(EBrick_Type brick_type, int level_x, int level_y);
 
 	void Act();
 	void Draw(HDC hdc , RECT& paint_area);
+	bool Is_Finished();
 
 	static void Setup_Colors();
 

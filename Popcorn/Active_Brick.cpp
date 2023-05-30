@@ -7,9 +7,14 @@ HBRUSH CActive_Brick::Fading_Blue_Brick_Brushes[Max_Fade_Step];
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-CActive_Brick::CActive_Brick(EBrick_Type brick_type) :
+CActive_Brick::CActive_Brick(EBrick_Type brick_type, int level_x, int level_y) :
 	Fade_Step(0), Brick_Type(brick_type), Brick_Rect{}
-{}
+{
+	Brick_Rect.left = (CsConfig::Level_X_Offset + level_x * CsConfig::Cell_Width) * CsConfig::Global_Scale;
+	Brick_Rect.top = (CsConfig::Level_Y_Offset + level_y * CsConfig::Cell_Height) * CsConfig::Global_Scale;
+	Brick_Rect.right = Brick_Rect.left + CsConfig::Brick_Width * CsConfig::Global_Scale;
+	Brick_Rect.bottom = Brick_Rect.top + CsConfig::Brick_Height * CsConfig::Global_Scale;
+}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CActive_Brick::Act()
 {
@@ -44,14 +49,16 @@ void CActive_Brick::Draw(HDC hdc, RECT& paint_area)
 	SelectObject(hdc, pen);
 	SelectObject(hdc, brush);
 
-	Brick_Rect.left = (CsConfig::Level_X_Offset + CsConfig::Cell_Width) * CsConfig::Global_Scale;
-	Brick_Rect.top = (CsConfig::Level_Y_Offset + CsConfig::Cell_Height) * CsConfig::Global_Scale;
-	Brick_Rect.right = Brick_Rect.left + CsConfig::Brick_Width * CsConfig::Global_Scale;
-	Brick_Rect.bottom = Brick_Rect.top + CsConfig::Brick_Height * CsConfig::Global_Scale;
-
-
 	RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right, Brick_Rect.bottom, 2 * CsConfig::Global_Scale, 2 * CsConfig::Global_Scale);
 
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CActive_Brick::Is_Finished()
+{
+	if (Fade_Step >= Max_Fade_Step - 1)
+		return true;
+	else
+		return false;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CActive_Brick::Setup_Colors()

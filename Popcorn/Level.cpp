@@ -44,7 +44,8 @@ CLevel::CLevel() :
 	Letter_Pen(0),
 	Brick_Red_brush(0),
 	Brick_Blue_brush(0),
-	Level_Rect{}
+	Level_Rect{},
+	Active_Bricks_Count(0)
 {}
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool CLevel::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
@@ -97,6 +98,7 @@ bool CLevel::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 					ball->Reflect(true);
 				else
 					ball->Reflect(false);
+				Add_Active_Brick(j, i);
 				return true;
 			}
 			else
@@ -104,29 +106,17 @@ bool CLevel::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 				if (got_horizontal_hit)
 				{
 					ball->Reflect(false);
+					Add_Active_Brick(j, i);
 					return true;
 				}
-				else if (got_vertical_hit)
-				{
-					ball->Reflect(true);
-					return true;
-				}
+				else 
+					if (got_vertical_hit)
+					{
+						ball->Reflect(true);
+						Add_Active_Brick(j, i);
+						return true;
+					}
 			}
-
-			//if (Is_Check_Horizontal_First(next_x_pos, next_y_pos))
-			//{
-			//	if (Check_Horizontal_Hit(next_x_pos, next_y_pos, j, i, ball))
-			//		return true;
-			//	if (Check_Vertical_Hit(next_x_pos, next_y_pos, j, i, ball))
-			//		return true;
-			//}
-			//else
-			//{
-			//	if (Check_Vertical_Hit(next_x_pos, next_y_pos, j, i, ball))
-			//		return true;
-			//	if (Check_Horizontal_Hit(next_x_pos, next_y_pos, j, i, ball))
-			//		return true;
-			//}
 		}
 	}
 	return false;
@@ -147,6 +137,7 @@ void CLevel::Init()
 	Level_Rect.bottom = Level_Rect.top + CsConfig::Cell_Height * CsConfig::Level_Height * CsConfig::Global_Scale;
 
 	memset(Current_Level, 0, sizeof(Current_Level));
+	memset(Active_Bricks, 0, sizeof(Active_Bricks));
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -154,6 +145,25 @@ void CLevel::Set_Current_Level(char level[CsConfig::Level_Height][CsConfig::Leve
 {
 	memcpy(Current_Level, level, sizeof(Current_Level));
 }
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CLevel::Act()
+{
+	for (int i = 0; i < CsConfig::Max_Active_Bricks_Count; ++i)
+	{
+		if (Active_Bricks[i] != 0)
+		{
+			Active_Bricks[i]->Act();
+
+			if (Active_Bricks[i]->Is_Finished())
+			{
+				delete Active_Bricks[i];
+				Active_Bricks[i] = 0;
+				--Active_Bricks_Count;
+			}
+		}
+	}
+}
+
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CLevel::Draw(HDC hdc, RECT& paint_area)
 {	// Отрисовка уровня игры
@@ -166,7 +176,46 @@ void CLevel::Draw(HDC hdc, RECT& paint_area)
 		for (int j = 0; j < CsConfig::Level_Width; ++j) 
 			Draw_Brick(hdc, CsConfig::Level_X_Offset + j * CsConfig::Cell_Width, CsConfig::Level_Y_Offset + i * CsConfig::Cell_Height, static_cast<EBrick_Type>(Current_Level[i][j]));
 	
-	//Active_Brick.Draw(hdc, paint_area);
+	for (int i = 0; i < CsConfig::Max_Active_Bricks_Count; ++i)
+	{
+		if (Active_Bricks[i] != 0)
+			Active_Bricks[i]->Draw(hdc, paint_area);
+	}
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+void CLevel::Add_Active_Brick(int brick_x, int brick_y)
+{
+	CActive_Brick* active_brick;
+	EBrick_Type brick_type;
+
+	if (Active_Bricks_Count >= CsConfig::Max_Active_Bricks_Count)
+		return;	// Активных кирпичей слишеом много, заглушка
+
+	brick_type = static_cast<EBrick_Type>(Current_Level[brick_y][brick_x]);
+
+	switch (brick_type)
+	{
+	case EBrick_Type::None:
+		return;
+
+	case EBrick_Type::Red:
+	case EBrick_Type::Blue:
+		active_brick = new CActive_Brick(brick_type, brick_x, brick_y);
+		break;
+
+	default:
+		return;
+	}
+
+	for (int i = 0; i < CsConfig::Max_Active_Bricks_Count; ++i)
+	{
+		if (Active_Bricks[i] == 0)
+		{
+			Active_Bricks[i] = active_brick;
+			++Active_Bricks_Count;
+			break;
+		}
+	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool CLevel::Check_Vertical_Hit(double next_x_pos, double next_y_pos, int level_x, int level_y, CBall* ball, double& reflection_pos)

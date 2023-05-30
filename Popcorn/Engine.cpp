@@ -131,7 +131,8 @@ int CsEngine::On_Timer()
 	}
 
 	Platform.Act();
-	//Level.Active_Brick.Act();
+
+	Level.Act();
 
 	//if (CsConfig::Current_Timer_Tick % 10 == 0)
 

@@ -52,5 +52,6 @@ public:
 	static const int Max_X_Pos = Level_X_Offset + Cell_Width * Level_Width;														// максимальноый Х уровня
 	static const int Max_Y_Pos = 199;																																	// максимальный У уровня
 	static const int Platform_Y_Pos = 185;																														// положение платформы по оси y
+	static const int Max_Active_Bricks_Count = 10;																										
 
 };
