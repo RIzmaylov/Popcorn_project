@@ -16,6 +16,7 @@ class CsPlatform : public CHit_Checker
 {
 public:
 	CsPlatform();
+	~CsPlatform();
 
 	bool Check_Hit(double next_x_pos, double next_y_pos, CBall* ball);
 
@@ -38,16 +39,20 @@ private:
 	void Draw_Roll_In_State(HDC hdc, RECT& paint_area);
 	void Draw_Expanding_Roll_In_State(HDC hdc, RECT& paint_area);
 	bool Reflect_On_Circle(double next_x_pos, double next_y_pos, double platform_ball_x_offset, CBall* ball);
+	bool Get_Platform_Image_Stroke_Color(int x, int y, HPEN& color_pen, int& stroke_len);
 
 	EPlatform_State Platform_State;
 	int Inner_Width;																													// ширина платформы между шариками
 	int Rolling_Step;																													// шаг поворота шарика платформы во время вкатывания
 
+	int Normal_Platform_Image_Width, Normal_Platform_Image_Height;
+	int* Normal_Platform_Image;																								// указатель на динамический массив пикселей нормального состояния платформы
+
 	static const int Normal_Width = 28;
 
 	int Meltdown_Platform_Y_Pos[Normal_Width * CsConfig::Global_Scale];				// положение Y расплавляющейся платформы
 
-
+	CColor Platform_Circle_pen_Color, Platform_Inner_pen_Color, Hightlight_Pen_Color;
 	HPEN Platform_Circle_pen, Platform_Inner_pen, Hightlight_Pen;
 	HBRUSH Platform_Circle_brush, Platform_Inner_brush;
 	RECT Platform_Rect, Prev_Platform_Rect;

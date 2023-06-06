@@ -47,9 +47,6 @@ void CsEngine::Draw_Frame(HDC hdc, RECT& paint_area)
 
 	Ball.Draw(hdc, paint_area);
 
-	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 100, EBrick_Type::Blue, ELetter_Type::O, i);
-	//	Draw_Brick_Letter(hdc, 20 + i * Cell_Width * Global_Scale, 130, EBrick_Type::Red, ELetter_Type::O, i);
-	//}
 }    
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 int CsEngine::On_Key_Down(EKey_Type key_type) 

@@ -8,6 +8,9 @@ CsPlatform::CsPlatform() :
 	Width(Normal_Width),												// ширина всей платформы (иеняется в зависимости от ситуации в игре)
 	Inner_Width(Normal_Platform_Inner_Width),		// ширина платформы между шариками
 	Rolling_Step(0),
+	Normal_Platform_Image_Width(0),
+	Normal_Platform_Image_Height(0),
+	Normal_Platform_Image(0),
 	Platform_State(EPlatform_State::Normal),
 	Platform_Circle_pen(0),
 	Platform_Inner_pen(0),
@@ -15,9 +18,17 @@ CsPlatform::CsPlatform() :
 	Platform_Circle_brush(0),
 	Platform_Inner_brush(0),
 	Platform_Rect{},
-	Prev_Platform_Rect{}
+	Prev_Platform_Rect{},
+	Platform_Circle_pen_Color(151, 0, 0),
+	Platform_Inner_pen_Color(0, 128, 192),
+	Hightlight_Pen_Color(255, 255, 255)
 {
 	X_Pos = (CsConfig::Max_X_Pos - Width) / 2;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+CsPlatform::~CsPlatform()
+{
+	delete[] Normal_Platform_Image;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 bool CsPlatform::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
@@ -58,10 +69,10 @@ bool CsPlatform::Check_Hit(double next_x_pos, double next_y_pos, CBall* ball)
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsPlatform::Init()
 {
-	Hightlight_Pen = CreatePen(PS_SOLID, 0, RGB(255, 255, 255));
+	Hightlight_Pen = CreatePen(PS_SOLID, 0, Hightlight_Pen_Color.Get_RGB());
 
-	CsConfig::Create_Pen_Brush(151, 0, 0, Platform_Circle_pen, Platform_Circle_brush);
-	CsConfig::Create_Pen_Brush(0, 128, 192, Platform_Inner_pen, Platform_Inner_brush);
+	CsConfig::Create_Pen_Brush(Platform_Circle_pen_Color, Platform_Circle_pen, Platform_Circle_brush);
+	CsConfig::Create_Pen_Brush(Platform_Inner_pen_Color, Platform_Inner_pen, Platform_Inner_brush);
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsPlatform::Act()
@@ -92,7 +103,7 @@ void CsPlatform::Set_State(EPlatform_State new_state)
 		len = sizeof(Meltdown_Platform_Y_Pos) / sizeof(Meltdown_Platform_Y_Pos[0]);
 
 		for (int i = 0; i < len; ++i)
-			Meltdown_Platform_Y_Pos[i] = Platform_Rect.bottom;
+			Meltdown_Platform_Y_Pos[i] = Platform_Rect.top;
 		break;
 
 	case EPlatform_State::Roll_In:
@@ -199,24 +210,39 @@ void CsPlatform::Draw_Normal_State(HDC hdc, RECT& paint_area)
 	SelectObject(hdc, Platform_Inner_brush);
 
 	RoundRect(hdc, (x + 4) * CsConfig::Global_Scale, (y + 1) * CsConfig::Global_Scale, (x + 4 + Inner_Width - 1) * CsConfig::Global_Scale, (y + 1 + 5) * CsConfig::Global_Scale - 1, 4 * CsConfig::Global_Scale, 4 * CsConfig::Global_Scale) - 1;
+	
+	x *= CsConfig::Global_Scale;
+	y *= CsConfig::Global_Scale;
+
+	if (Normal_Platform_Image == 0)
+	{
+		int offset = 0;
+
+		Normal_Platform_Image_Width = Width * CsConfig::Global_Scale;
+		Normal_Platform_Image_Height = Height * CsConfig::Global_Scale;
+
+		Normal_Platform_Image = new int[Normal_Platform_Image_Width * Normal_Platform_Image_Height];
+	
+		for (int i = 0; i < Normal_Platform_Image_Height; ++i)
+			for (int j = 0; j < Normal_Platform_Image_Width; ++j)
+				Normal_Platform_Image[offset++] = GetPixel(hdc, x + j, y + i);
+	}
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 void CsPlatform::Draw_Meltdown_State(HDC hdc, RECT& paint_area)
 {	// Отрисовка расплавляющейся платформы
 
-	int area_width, area_height;												// области перерисовки платформы с учетом масштаба
 	int x, y, y_offset;
+	int stroke_len;
 	int moved_column_count = 0;
 	int max_platform_y;
+	HPEN color_pen;
 	COLORREF pixel;
 	COLORREF bg_pixel = RGB(CsConfig::BG_Color.R, CsConfig::BG_Color.G, CsConfig::BG_Color.B);
 
-	area_width = Width * CsConfig::Global_Scale;
-	area_height = Height * CsConfig::Global_Scale + 1;
+	max_platform_y = (CsConfig::Max_Y_Pos + 1) * CsConfig::Global_Scale;
 
-	max_platform_y = CsConfig::Max_Y_Pos * CsConfig::Global_Scale + area_height;
-
-	for (int i = 0; i < area_width; ++i)
+	for (int i = 0; i < Normal_Platform_Image_Width; ++i)
 	{
 		if (Meltdown_Platform_Y_Pos[i] > max_platform_y)
 			continue;
@@ -225,19 +251,25 @@ void CsPlatform::Draw_Meltdown_State(HDC hdc, RECT& paint_area)
 		y_offset = CsConfig::Rand(Meltdown_Speed) + 1;
 		x = Platform_Rect.left + i;
 
-		for (int j = 0; j < area_height; ++j)
-		{
-			y = Meltdown_Platform_Y_Pos[i] - j;
+		int j = 0;
+		y = Meltdown_Platform_Y_Pos[i];
 
-			pixel = GetPixel(hdc, x, y);
-			SetPixel(hdc, x, y + y_offset, pixel);
+		MoveToEx(hdc, x, y, 0);
+
+		// Отрисовка последовательности вертикальных штрихов разного цвета согласно прообразу, сохраненному в массиве
+		while (Get_Platform_Image_Stroke_Color(i, j, color_pen, stroke_len))
+		{
+			SelectObject(hdc, color_pen);
+			LineTo(hdc, x, y + stroke_len);
+			y += stroke_len;
+			j += stroke_len;
 		}
 
-		for (int j = 0; j < y_offset; ++j)
-		{
-			y = Meltdown_Platform_Y_Pos[i] - area_height + 1 + j;
-			SetPixel(hdc, x, y, bg_pixel);
-		}
+		// стирание фоном пикселей платформы
+		y = Meltdown_Platform_Y_Pos[i];
+		MoveToEx(hdc, x, y, 0);
+		SelectObject(hdc, CsConfig::BG_Pen);
+		LineTo(hdc, x, y + y_offset);
 
 		Meltdown_Platform_Y_Pos[i] += y_offset;
 	}
@@ -361,5 +393,44 @@ bool CsPlatform::Reflect_On_Circle(double next_x_pos, double next_y_pos, double 
 		}
 	}
 	return false;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bool CsPlatform::Get_Platform_Image_Stroke_Color(int x, int y, HPEN& color_pen, int& stroke_len)
+{	// Вычисление длины очередного штриха при расплавлении платформы
+	int offset = y * Normal_Platform_Image_Width + x;					// позиция в массиве Normal_PLatform_Image, соответствующая позиции x, y)
+	int color;
+	stroke_len = 0;
+
+	if (y >= Normal_Platform_Image_Height)
+		return false;
+
+	for (int i = y; i < Normal_Platform_Image_Height; ++i)
+	{
+		if (i == y)
+		{
+			color = Normal_Platform_Image[offset];
+			stroke_len = 1;
+		}
+		else
+		{
+			if (color == Normal_Platform_Image[offset])
+				++stroke_len;
+			else
+				break;
+		}
+
+		offset += Normal_Platform_Image_Width;													// Переход на строку ниже
+	}
+
+	if (color == Hightlight_Pen_Color.Get_RGB())
+		color_pen = Hightlight_Pen;
+	else if (color == Platform_Circle_pen_Color.Get_RGB())
+		color_pen = Platform_Circle_pen;
+	else if (color == Platform_Inner_pen_Color.Get_RGB())
+		color_pen = Platform_Inner_pen;
+	else if (color == CsConfig::BG_Color.Get_RGB())
+		color_pen = CsConfig::BG_Pen;
+
+	return true;
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
