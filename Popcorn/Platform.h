@@ -26,6 +26,7 @@ public:
 	void Set_State(EPlatform_State new_state);
 	void Redraw(); 
 	void Draw(HDC hdc, RECT& paint_area);
+	void Move(bool to_left);
 
 	int X_Pos;																																// положение платформы по оси x
 	int X_Step;																																// смещение платформы по оси x

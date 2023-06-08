@@ -49,7 +49,7 @@ void CActive_Brick::Draw(HDC hdc, RECT& paint_area)
 	SelectObject(hdc, pen);
 	SelectObject(hdc, brush);
 
-	RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right, Brick_Rect.bottom, 2 * CsConfig::Global_Scale, 2 * CsConfig::Global_Scale);
+	RoundRect(hdc, Brick_Rect.left, Brick_Rect.top, Brick_Rect.right - 1, Brick_Rect.bottom - 1, 2 * CsConfig::Global_Scale, 2 * CsConfig::Global_Scale);
 
 }
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------

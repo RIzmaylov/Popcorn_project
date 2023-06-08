@@ -8,6 +8,14 @@ CsEngine::CsEngine() :
 void CsEngine::Init_Engine(HWND hwnd)
 {	//Настройка игры при старте
 
+	SYSTEMTIME sys_time;
+	FILETIME file_time;
+
+	GetSystemTime(&sys_time);
+	SystemTimeToFileTime(&sys_time, &file_time);
+
+	srand(file_time.dwLowDateTime);
+
 	CsConfig::Hwnd = hwnd;
 
 	// создание кистей и карандашей фона и кирпичей
@@ -54,24 +62,12 @@ int CsEngine::On_Key_Down(EKey_Type key_type)
 	switch (key_type)
 	{
 	case EKey_Type::Left:
-		Platform.X_Pos -= Platform.X_Step;
-
-		if (Platform.X_Pos <= CsConfig::Border_X_Offset)
-			Platform.X_Pos = CsConfig::Border_X_Offset;
-
-		Platform.Redraw();
+		Platform.Move(true);
 		break;
-
 
 	case EKey_Type::Right:
-		Platform.X_Pos += Platform.X_Step;
-
-		if (Platform.X_Pos >= CsConfig::Max_X_Pos - Platform.Width + 1)
-			Platform.X_Pos = CsConfig::Max_X_Pos - Platform.Width + 1;
-
-		Platform.Redraw();
+		Platform.Move(false);
 		break;
-
 
 	case EKey_Type::Space:
 		if (Platform.Get_State() == EPlatform_State::Ready)

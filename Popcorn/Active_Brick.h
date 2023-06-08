@@ -18,8 +18,15 @@ enum class EBrick_Type
 	Ad //кирпич-банер
 };
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-class CActive_Brick
+class CGraphics_Object
+{
+public:
+	virtual void Act() = 0;
+	virtual void Draw(HDC hdc , RECT& paint_area) = 0;
+	virtual bool Is_Finished() = 0;
+};
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------
+class CActive_Brick : public CGraphics_Object
 {
 public:
 	CActive_Brick(EBrick_Type brick_type, int level_x, int level_y);
@@ -39,7 +46,7 @@ private:
 	static void Get_Fading_Color(const CColor& color, int step, HPEN& pen, HBRUSH& brush);
 
 	// Максимальный шаг затухания кирпича
-	static const int Max_Fade_Step = 40;
+	static const int Max_Fade_Step = CsConfig::FPS;
 
 	// Создание массивов карандашей и кистей для затухающих кирпичей
 	static HPEN Fading_Red_Brick_Pens[Max_Fade_Step];
